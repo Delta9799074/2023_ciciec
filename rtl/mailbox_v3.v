@@ -106,7 +106,7 @@ reg         hsel_delay;
 //2023/05/24
 reg          ch0_clear_intr, ch1_clear_intr;
 //CTRLs
-wire [31:0] ch0_ctrl, ch1_ctrl;
+(*mark_debug = "true"*)wire [31:0] ch0_ctrl, ch1_ctrl;
 wire        ch0_int_enable, ch0_read_ok, ch1_int_enable, ch1_read_ok;
 wire [1:0]  ch0_trans_mode, ch1_trans_mode;
 wire [13:0] ch0_trans_len, ch1_trans_len;
@@ -152,12 +152,12 @@ assign ch1_trans_mode = ch1_ctrl[30:29];
 assign ch1_trans_len  = ch1_ctrl[28:15];
 assign ch1_read_ok    = (ch1_ctrl == CLEAR_INT_CMD);
 //Status
-wire [31:0] ch0_status, ch1_status;
+(*mark_debug = "true"*)wire [31:0] ch0_status, ch1_status;
 wire        ch0_int_status, ch1_int_status;
 assign ch0_int_status = ch0_status[1];
 assign ch1_int_status = ch1_status[1];
 
-
+(*mark_debug = "true"*)wire [31:0] ch0_data, ch1_data;
 
 
 
@@ -171,7 +171,8 @@ mailbox_channel c02c1(
     .clear_intr (ch0_clear_intr), //2023/05/24
     .int_flag   (c1_tx_intr),
     .ch_ctrl    (ch0_ctrl),
-    .ch_status  (ch0_status)
+    .ch_status  (ch0_status),
+    .ch_data    (ch0_data)
 );
 
 mailbox_channel c12c0(
@@ -184,7 +185,8 @@ mailbox_channel c12c0(
     .clear_intr (ch1_clear_intr), //2023/05/24
     .int_flag   (c0_tx_intr),
     .ch_ctrl    (ch1_ctrl),         //2023/05/24
-    .ch_status  (ch1_status)      //2023/05/24
+    .ch_status  (ch1_status),      //2023/05/24
+    .ch_data    (ch1_data)
 );
 //WRITE CHANNEL REG ENABLE
 //ch0

@@ -11,8 +11,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module pmu_dummy_top(
   cpu_pmu_dfs_ack,
   cpu_pmu_sleep_b,
-  cpu_pmu2_dfs_ack,
-  cpu_pmu2_sleep_b,
+  //cpu_pmu2_dfs_ack,
+  //cpu_pmu2_sleep_b,
   cpu_pmu2_dfs_ack,
   cpu_pmu2_sleep_b,
   dft_clk,

@@ -1216,7 +1216,7 @@ sms_sram_bk2_dram7  x_sms7_sram (
 );
 assign resp_cfg[3:0] = 4'b1000;
 endmodule
-
+/*
 module sms_bank_64k_top2_dram2(
   big_endian_b,
   mem_haddr,
@@ -1557,7 +1557,7 @@ sms_sram_bk2_dram9  x_sms9_sram (
   .ram_write  (ram_write )
 );
 assign resp_cfg[3:0] = 4'b1000;
-endmodule
+endmodule*/
 
 
 
@@ -2817,7 +2817,7 @@ endmodule
 // );
 
 // endmodule
-
+/*
 module sms_sram_bk2_dram8(
   hrst_b,
   ram_addr,  //addr
@@ -3029,7 +3029,7 @@ dram9    blk_mem_gen_0_u(
 );
 
 endmodule
-
+*/
 
 module sms_top(
   ahb_sms0_haddr,

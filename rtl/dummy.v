@@ -70,7 +70,7 @@ assign hready = 1'b1;
 assign hresp[1:0] = 2'b0;    
 assign intr = 1'b0;     
 endmodule
-module ahbm_dummy_top(
+/*module ahbm_dummy_top(
 hclk,
 hrst_b,
 mhrdata,
@@ -112,4 +112,4 @@ assign mhsize[2 :0]  = 3'b0;
 assign mhtrans[1 :0] = 2'b0; 
 assign mhwdata[31:0] = 32'b0; 
 assign mhwrite       = 1'b0;
-endmodule
+endmodule*/

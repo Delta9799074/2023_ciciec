@@ -72,65 +72,8 @@ module wujian100_open_top(
   vadj_en,
   set_vadj,
   qspi_dq
+
 );
-//new0517
-wire REE_rst_b;
-wire [31:0] REE_rst_addr;
-output    [1:0] qspi_dq;
-// wire          spi_mi;
-// wire          qspi_cs;    
-wire    [1:0] qspi_dq;
-assign qspi_dq[0] = 1'b1;  //为0表示开启写保护，不开启写保护
-assign qspi_dq[1] = 1'b1;  //hold引脚信号，连接到 spi_nss 上？todo
-// input   [31:0]  pad_cpu_rst_addr;    
-// wire    [31:0]  pad_cpu_rst_addr;  
-input           clk;            //100Mhz
-clk_wiz_0 u_clk_wiz_0
- (
-  // Clock out ports
-  .clk_out1(PIN_EHS),  //20Mhz  
-  // Status and control signals
-  .resetn(PAD_MCURST),  
- // Clock in ports
-  .clk_in1(clk)  //100Mhz
- );
-output reg vadj_en;
-output reg[1:0] set_vadj;
-reg[31:0] counter;
-reg flag;
-parameter time1 = 32'd400000;         //the bigger one 
-parameter time2 = 32'd200000;
-always@(posedge PIN_EHS or negedge PAD_MCURST)begin
-    if(!PAD_MCURST)
-        counter <= 32'd0;
-    else 
-        counter <= counter +1'b1;
-end
-always@(posedge PIN_EHS or negedge PAD_MCURST)begin
-    if(!PAD_MCURST)
-        flag <= 1'b1;
-    else if(counter == 32'd600000)
-        flag <= 1'b0;
-    else
-        flag <= flag;
-end
-always@(posedge PIN_EHS or negedge PAD_MCURST)begin
-    if(!PAD_MCURST)
-        set_vadj <= 2'd0;
-    else if(counter == time2 && flag)
-        set_vadj <= 2'd3;
-    else 
-        set_vadj <= set_vadj;
-end
-always@(posedge PIN_EHS or negedge PAD_MCURST)begin
-    if(!PAD_MCURST)
-        vadj_en <= 1'b0;
-    else if(counter == time1 && flag)
-        vadj_en <= 1'b1;
-    else 
-        vadj_en <= vadj_en;
-end
-    
 //wire           PIN_EHS;               
 output          POUT_EHS;              
 inout           PAD_GPIO_0;            
@@ -229,7 +172,7 @@ wire            PAD_GPIO_8;
 wire            PAD_GPIO_9;            
 wire            PAD_JTAG_TCLK;         
 wire            PAD_JTAG_TMS;          
-wire            PAD_MCURST;            
+//wire            PAD_MCURST;            
 wire            PAD_PWM_CH0;           
 wire            PAD_PWM_CH1;           
 wire            PAD_PWM_CH10;          
@@ -326,7 +269,7 @@ wire    [31:0]  mdummy2_hmain0_m6_hwdata;
 wire            mdummy2_hmain0_m6_hwrite;
 wire            cpu_padmux_jtg_tms_ien; 
 wire            cpu_padmux_jtg_tms_o;  
-wire            cpu_padmux_jtg2_tms_o;   //将cpu的两个output信号连出去，避免重复赋值造成冲突
+wire            cpu_padmux_jtg2_tms_o;   //将cpu的两个output信号连出去，避免重复赋�?��?�成冲突
 wire            cpu_padmux_jtg_tms_oe; 
 wire            cpu_padmux_jtg2_tms_oe; 
 wire            cpu_padmux_jtg_tms_oen; 
@@ -688,8 +631,110 @@ wire            usi2_ioctl_sd1_out;
 wire            usi2_wic_intr;         
 wire            wdt_pmu_rst_b;         
 wire            wdt_wic_intr;          
-wire            cpu0_mbx_intr;
-wire            cpu1_mbx_intr;
+(*mark_debug = "true"*)wire            cpu0_mbx_intr;
+(*mark_debug = "true"*)wire            cpu1_mbx_intr;
+//!2023/06/25
+wire [3:0]  t_mbx_s9_hprot;
+wire [2:0]  t_mbx_s9_hsize;
+wire [1:0]  t_mbx_s9_htrans;
+wire [31:0] t_mbx_s9_hwdata;
+wire        t_mbx_s9_hwrite;
+wire [31:0] t_mbx_s9_haddr;
+wire [31:0] t_mbx_s9_hrdata;
+wire        t_mbx_s9_hready;
+wire [1:0]  t_mbx_s9_hresp;
+wire [3:0]  t_iopmp_s9_hprot;
+wire [2:0]  t_iopmp_s9_hsize;
+wire [1:0]  t_iopmp_s9_htrans;
+wire [31:0] t_iopmp_s9_hwdata;
+wire        t_iopmp_s9_hwrite;
+wire [31:0] t_iopmp_s9_haddr;
+wire [31:0] t_iopmp_s9_hrdata;
+wire        t_iopmp_s9_hready;
+wire [1:0]  t_iopmp_s9_hresp;
+
+//!2023/06/23
+wire [31:0]  iopmp_cpu_hmain0_m0_haddr; 
+wire [2 :0]  iopmp_cpu_hmain0_m0_hburst;
+wire [3 :0]  iopmp_cpu_hmain0_m0_hprot; 
+wire [2 :0]  iopmp_cpu_hmain0_m0_hsize; 
+wire [1 :0]  iopmp_cpu_hmain0_m0_htrans;
+wire [31:0]  iopmp_cpu_hmain0_m0_hwdata;
+wire         iopmp_cpu_hmain0_m0_hwrite;
+wire [31:0]  iopmp_cpu_hmain0_m1_haddr; 
+wire [2 :0]  iopmp_cpu_hmain0_m1_hburst;
+wire [3 :0]  iopmp_cpu_hmain0_m1_hprot; 
+wire [2 :0]  iopmp_cpu_hmain0_m1_hsize; 
+wire [1 :0]  iopmp_cpu_hmain0_m1_htrans;
+wire [31:0]  iopmp_cpu_hmain0_m1_hwdata;
+wire         iopmp_cpu_hmain0_m1_hwrite;
+wire [31:0]  iopmp_cpu_hmain0_m2_haddr; 
+wire [2 :0]  iopmp_cpu_hmain0_m2_hburst;
+wire [3 :0]  iopmp_cpu_hmain0_m2_hprot; 
+wire [2 :0]  iopmp_cpu_hmain0_m2_hsize; 
+wire [1 :0]  iopmp_cpu_hmain0_m2_htrans;
+wire [31:0]  iopmp_cpu_hmain0_m2_hwdata;
+wire         iopmp_cpu_hmain0_m2_hwrite;
+//!2023/06/24
+wire         iopmp_deny_intr;
+//new0517
+wire REE_rst_b;
+wire [31:0] REE_rst_addr;
+output    [1:0] qspi_dq;
+// wire          spi_mi;
+// wire          qspi_cs;    
+wire    [1:0] qspi_dq;
+assign qspi_dq[0] = 1'b1;  //�??0表示�??启写保护，不�??启写保护
+assign qspi_dq[1] = 1'b1;  //hold引脚信号，连接到 spi_nss 上？todo
+// input   [31:0]  pad_cpu_rst_addr;    
+// wire    [31:0]  pad_cpu_rst_addr;  
+input           clk;            //100Mhz
+clk_wiz_0 u_clk_wiz_0
+ (
+  // Clock out ports
+  .clk_out1(PIN_EHS),  //20Mhz  
+  // Status and control signals
+  //.resetn(PAD_MCURST),  
+ // Clock in ports
+  .clk_in1(clk)  //100Mhz
+ );
+output reg vadj_en;
+output reg[1:0] set_vadj;
+reg[31:0] counter;
+reg flag;
+parameter time1 = 32'd400000;         //the bigger one 
+parameter time2 = 32'd200000;
+always@(posedge PIN_EHS or negedge PAD_MCURST)begin
+    if(!PAD_MCURST)
+        counter <= 32'd0;
+    else 
+        counter <= counter +1'b1;
+end
+always@(posedge PIN_EHS or negedge PAD_MCURST)begin
+    if(!PAD_MCURST)
+        flag <= 1'b1;
+    else if(counter == 32'd600000)
+        flag <= 1'b0;
+    else
+        flag <= flag;
+end
+always@(posedge PIN_EHS or negedge PAD_MCURST)begin
+    if(!PAD_MCURST)
+        set_vadj <= 2'd0;
+    else if(counter == time2 && flag)
+        set_vadj <= 2'd3;
+    else 
+        set_vadj <= set_vadj;
+end
+always@(posedge PIN_EHS or negedge PAD_MCURST)begin
+    if(!PAD_MCURST)
+        vadj_en <= 1'b0;
+    else if(counter == time1 && flag)
+        vadj_en <= 1'b1;
+    else 
+        vadj_en <= vadj_en;
+end
+    
 aou_top  x_aou_top (
   .apb1_gpio_psel_s5     (apb1_gpio_psel_s5    ),
   .apb1_pmu_psel_s15     (apb1_pmu_psel_s15    ),
@@ -872,27 +917,27 @@ pdu_top  x_pdu_top (
   .cpu_hmain0_m2_htrans  (cpu_hmain0_m2_htrans ),
   .cpu_hmain0_m2_hwdata  (cpu_hmain0_m2_hwdata ),
   .cpu_hmain0_m2_hwrite  (cpu_hmain0_m2_hwrite ),
-  .mdummy0_hmain0_m4_haddr (mdummy0_hmain0_m4_haddr ),  
-  .mdummy0_hmain0_m4_hburst(mdummy0_hmain0_m4_hburst), 
-  .mdummy0_hmain0_m4_hprot (mdummy0_hmain0_m4_hprot ),    
-  .mdummy0_hmain0_m4_hsize (mdummy0_hmain0_m4_hsize ),    
-  .mdummy0_hmain0_m4_htrans(mdummy0_hmain0_m4_htrans),   
-  .mdummy0_hmain0_m4_hwdata(mdummy0_hmain0_m4_hwdata),   
-  .mdummy0_hmain0_m4_hwrite(mdummy0_hmain0_m4_hwrite),   
-  .mdummy1_hmain0_m5_haddr (mdummy1_hmain0_m5_haddr ),    
-  .mdummy1_hmain0_m5_hburst(mdummy1_hmain0_m5_hburst),   
-  .mdummy1_hmain0_m5_hprot (mdummy1_hmain0_m5_hprot ),     
-  .mdummy1_hmain0_m5_hsize (mdummy1_hmain0_m5_hsize ),    
-  .mdummy1_hmain0_m5_htrans(mdummy1_hmain0_m5_htrans),   
-  .mdummy1_hmain0_m5_hwdata(mdummy1_hmain0_m5_hwdata),   
-  .mdummy1_hmain0_m5_hwrite(mdummy1_hmain0_m5_hwrite),   
-  .mdummy2_hmain0_m6_haddr (mdummy2_hmain0_m6_haddr ),    
-  .mdummy2_hmain0_m6_hburst(mdummy2_hmain0_m6_hburst),   
-  .mdummy2_hmain0_m6_hprot (mdummy2_hmain0_m6_hprot ),    
-  .mdummy2_hmain0_m6_hsize (mdummy2_hmain0_m6_hsize ),    
-  .mdummy2_hmain0_m6_htrans(mdummy2_hmain0_m6_htrans),   
-  .mdummy2_hmain0_m6_hwdata(mdummy2_hmain0_m6_hwdata),   
-  .mdummy2_hmain0_m6_hwrite(mdummy2_hmain0_m6_hwrite),
+  .mdummy0_hmain0_m4_haddr (/* mdummy0_hmain0_m4_haddr  */iopmp_cpu_hmain0_m0_haddr ), //from IOPMP 
+  .mdummy0_hmain0_m4_hburst(/* mdummy0_hmain0_m4_hburst */iopmp_cpu_hmain0_m0_hburst), //from IOPMP
+  .mdummy0_hmain0_m4_hprot (/* mdummy0_hmain0_m4_hprot  */iopmp_cpu_hmain0_m0_hprot ), //from IOPMP   
+  .mdummy0_hmain0_m4_hsize (/* mdummy0_hmain0_m4_hsize  */iopmp_cpu_hmain0_m0_hsize ), //from IOPMP   
+  .mdummy0_hmain0_m4_htrans(/* mdummy0_hmain0_m4_htrans */iopmp_cpu_hmain0_m0_htrans), //from IOPMP  
+  .mdummy0_hmain0_m4_hwdata(/* mdummy0_hmain0_m4_hwdata */iopmp_cpu_hmain0_m0_hwdata), //from IOPMP  
+  .mdummy0_hmain0_m4_hwrite(/* mdummy0_hmain0_m4_hwrite */iopmp_cpu_hmain0_m0_hwrite), //from IOPMP  
+  .mdummy1_hmain0_m5_haddr (/* mdummy1_hmain0_m5_haddr  */iopmp_cpu_hmain0_m1_haddr ), //from IOPMP   
+  .mdummy1_hmain0_m5_hburst(/* mdummy1_hmain0_m5_hburst */iopmp_cpu_hmain0_m1_hburst), //from IOPMP  
+  .mdummy1_hmain0_m5_hprot (/* mdummy1_hmain0_m5_hprot  */iopmp_cpu_hmain0_m1_hprot ), //from IOPMP    
+  .mdummy1_hmain0_m5_hsize (/* mdummy1_hmain0_m5_hsize  */iopmp_cpu_hmain0_m1_hsize ), //from IOPMP   
+  .mdummy1_hmain0_m5_htrans(/* mdummy1_hmain0_m5_htrans */iopmp_cpu_hmain0_m1_htrans), //from IOPMP  
+  .mdummy1_hmain0_m5_hwdata(/* mdummy1_hmain0_m5_hwdata */iopmp_cpu_hmain0_m1_hwdata), //from IOPMP  
+  .mdummy1_hmain0_m5_hwrite(/* mdummy1_hmain0_m5_hwrite */iopmp_cpu_hmain0_m1_hwrite), //from IOPMP  
+  .mdummy2_hmain0_m6_haddr (/* mdummy2_hmain0_m6_haddr  */iopmp_cpu_hmain0_m2_haddr ), //from IOPMP   
+  .mdummy2_hmain0_m6_hburst(/* mdummy2_hmain0_m6_hburst */iopmp_cpu_hmain0_m2_hburst), //from IOPMP  
+  .mdummy2_hmain0_m6_hprot (/* mdummy2_hmain0_m6_hprot  */iopmp_cpu_hmain0_m2_hprot ), //from IOPMP   
+  .mdummy2_hmain0_m6_hsize (/* mdummy2_hmain0_m6_hsize  */iopmp_cpu_hmain0_m2_hsize ), //from IOPMP   
+  .mdummy2_hmain0_m6_htrans(/* mdummy2_hmain0_m6_htrans */iopmp_cpu_hmain0_m2_htrans), //from IOPMP  
+  .mdummy2_hmain0_m6_hwdata(/* mdummy2_hmain0_m6_hwdata */iopmp_cpu_hmain0_m2_hwdata), //from IOPMP  
+  .mdummy2_hmain0_m6_hwrite(/* mdummy2_hmain0_m6_hwrite */iopmp_cpu_hmain0_m2_hwrite), //from IOPMP
   .dmac0_wic_intr        (dmac0_wic_intr       ),
   .gpio_apb1_prdata      (gpio_apb1_prdata     ),
   .hmain0_cpu_m0_hrdata  (hmain0_cpu_m0_hrdata ),
@@ -1211,220 +1256,303 @@ pdu_top  x_pdu_top (
   .imemdummy0_hmain0_s1_hresp  (imemdummy0_hmain0_s1_hresp )
 );
 core_top  x_cpu1_top (
-  .apb0_dummy1_intr      (apb0_dummy1_intr     ),
-  .apb0_dummy2_intr      (apb0_dummy2_intr     ),
-  .apb0_dummy3_intr      (apb0_dummy3_intr     ),
-  .apb0_dummy4_intr      (apb0_dummy4_intr     ),
-  .apb0_dummy5_intr      (apb0_dummy5_intr     ),
-  .apb0_dummy7_intr      (apb0_dummy7_intr     ),
-  .apb0_dummy8_intr      (apb0_dummy8_intr     ),
-  .apb0_dummy9_intr      (apb0_dummy9_intr     ),
-  .apb1_dummy1_intr      (apb1_dummy1_intr     ),
-  .apb1_dummy2_intr      (apb1_dummy2_intr     ),
-  .apb1_dummy3_intr      (apb1_dummy3_intr     ),
-  .apb1_dummy4_intr      (apb1_dummy4_intr     ),
-  .apb1_dummy5_intr      (apb1_dummy5_intr     ),
-  .apb1_dummy6_intr      (apb1_dummy6_intr     ),
-  .apb1_dummy7_intr      (apb1_dummy7_intr     ),
-  .apb1_dummy8_intr      (apb1_dummy8_intr     ),  // connect into pdu_top
-  .bist0_mode            (bist0_mode           ),  //=1'b1
-  .cpu_hmain0_m0_haddr   (cpu_hmain0_m0_haddr  ),
-  .cpu_hmain0_m0_hburst  (cpu_hmain0_m0_hburst ),
-  .cpu_hmain0_m0_hprot   (cpu_hmain0_m0_hprot  ),
-  .cpu_hmain0_m0_hsize   (cpu_hmain0_m0_hsize  ),
-  .cpu_hmain0_m0_htrans  (cpu_hmain0_m0_htrans ),
-  .cpu_hmain0_m0_hwdata  (cpu_hmain0_m0_hwdata ),
-  .cpu_hmain0_m0_hwrite  (cpu_hmain0_m0_hwrite ),
-  .cpu_hmain0_m1_haddr   (cpu_hmain0_m1_haddr  ),
-  .cpu_hmain0_m1_hburst  (cpu_hmain0_m1_hburst ),
-  .cpu_hmain0_m1_hprot   (cpu_hmain0_m1_hprot  ),
-  .cpu_hmain0_m1_hsize   (cpu_hmain0_m1_hsize  ),
-  .cpu_hmain0_m1_htrans  (cpu_hmain0_m1_htrans ),
-  .cpu_hmain0_m1_hwdata  (cpu_hmain0_m1_hwdata ),
-  .cpu_hmain0_m1_hwrite  (cpu_hmain0_m1_hwrite ),
-  .cpu_hmain0_m2_haddr   (cpu_hmain0_m2_haddr  ),
-  .cpu_hmain0_m2_hburst  (cpu_hmain0_m2_hburst ),
-  .cpu_hmain0_m2_hprot   (cpu_hmain0_m2_hprot  ),
-  .cpu_hmain0_m2_hsize   (cpu_hmain0_m2_hsize  ),
-  .cpu_hmain0_m2_htrans  (cpu_hmain0_m2_htrans ),
-  .cpu_hmain0_m2_hwdata  (cpu_hmain0_m2_hwdata ),
-  .cpu_hmain0_m2_hwrite  (cpu_hmain0_m2_hwrite ),  //connect into pdu_top
+  .apb0_dummy1_intr      (apb0_dummy1_intr     ),   //dummy interrupt
+  .apb0_dummy2_intr      (apb0_dummy2_intr     ),   //dummy interrupt
+  .apb0_dummy3_intr      (apb0_dummy3_intr     ),   //dummy interrupt
+  .apb0_dummy4_intr      (apb0_dummy4_intr     ),   //dummy interrupt
+  .apb0_dummy5_intr      (apb0_dummy5_intr     ),   //dummy interrupt
+  .apb0_dummy7_intr      (apb0_dummy7_intr     ),   //dummy interrupt
+  .apb0_dummy8_intr      (apb0_dummy8_intr     ),   //dummy interrupt
+  .apb0_dummy9_intr      (apb0_dummy9_intr     ),   //dummy interrupt
+  .apb1_dummy1_intr      (apb1_dummy1_intr     ),   //dummy interrupt
+  .apb1_dummy2_intr      (apb1_dummy2_intr     ),   //dummy interrupt
+  .apb1_dummy3_intr      (apb1_dummy3_intr     ),   //dummy interrupt
+  .apb1_dummy4_intr      (apb1_dummy4_intr     ),   //dummy interrupt
+  .apb1_dummy5_intr      (apb1_dummy5_intr     ),   //dummy interrupt
+  .apb1_dummy6_intr      (apb1_dummy6_intr     ),   //dummy interrupt
+  .apb1_dummy7_intr      (apb1_dummy7_intr     ),   //dummy interrupt
+  .apb1_dummy8_intr      (apb1_dummy8_intr     ),   // connect into pdu_top
+  .bist0_mode            (bist0_mode           ),   //=1'b1
+  .cpu_hmain0_m0_haddr   (cpu_hmain0_m0_haddr  ),   //master AHB signal, o
+  .cpu_hmain0_m0_hburst  (cpu_hmain0_m0_hburst ),   //master AHB signal, o
+  .cpu_hmain0_m0_hprot   (cpu_hmain0_m0_hprot  ),   //master AHB signal, o
+  .cpu_hmain0_m0_hsize   (cpu_hmain0_m0_hsize  ),   //master AHB signal, o
+  .cpu_hmain0_m0_htrans  (cpu_hmain0_m0_htrans ),   //master AHB signal, o
+  .cpu_hmain0_m0_hwdata  (cpu_hmain0_m0_hwdata ),   //master AHB signal, o
+  .cpu_hmain0_m0_hwrite  (cpu_hmain0_m0_hwrite ),   //master AHB signal, o
+  .cpu_hmain0_m1_haddr   (cpu_hmain0_m1_haddr  ),   //master AHB signal, o
+  .cpu_hmain0_m1_hburst  (cpu_hmain0_m1_hburst ),   //master AHB signal, o
+  .cpu_hmain0_m1_hprot   (cpu_hmain0_m1_hprot  ),   //master AHB signal, o
+  .cpu_hmain0_m1_hsize   (cpu_hmain0_m1_hsize  ),   //master AHB signal, o
+  .cpu_hmain0_m1_htrans  (cpu_hmain0_m1_htrans ),   //master AHB signal, o
+  .cpu_hmain0_m1_hwdata  (cpu_hmain0_m1_hwdata ),   //master AHB signal, o
+  .cpu_hmain0_m1_hwrite  (cpu_hmain0_m1_hwrite ),   //master AHB signal, o
+  .cpu_hmain0_m2_haddr   (cpu_hmain0_m2_haddr  ),   //master AHB signal, o
+  .cpu_hmain0_m2_hburst  (cpu_hmain0_m2_hburst ),   //master AHB signal, o
+  .cpu_hmain0_m2_hprot   (cpu_hmain0_m2_hprot  ),   //master AHB signal, o
+  .cpu_hmain0_m2_hsize   (cpu_hmain0_m2_hsize  ),   //master AHB signal, o
+  .cpu_hmain0_m2_htrans  (cpu_hmain0_m2_htrans ),   //master AHB signal, o
+  .cpu_hmain0_m2_hwdata  (cpu_hmain0_m2_hwdata ),   //master AHB signal, o
+  .cpu_hmain0_m2_hwrite  (cpu_hmain0_m2_hwrite ),   //connect into pdu_top
   .cpu_padmux_jtg_tms_o  (cpu_padmux_jtg_tms_o ),   //在tclk下降沿设置该信号，输出给外部调试器，cpu通过该接口告知用户cpu寄存器以及存储器内容（也就是软件可以获取并读取到cpu寄存器的值）
-  .cpu_padmux_jtg_tms_oe (cpu_padmux_jtg_tms_oe),  //jtag_tms_oen ，是cpu_padmux_jtg_tms_o信号的有效指示信号
-  .padmux_cpu_jtg_tms_i  (padmux_cpu_jtg_tms_i ), //jtag_tms_i，为2线制串行数据输入信号，空闲时为高电平，经过设置可用于同步复位调试模式   
-                                                  //connect outside  can inst a PAD module
-  .cpu_pmu_dfs_ack       (cpu_pmu_dfs_ack      ),  //output never mind  just pullout
-  .cpu_pmu_sleep_b       (cpu_pmu_sleep_b      ),  //output never mind  just pullout
-  .dft_clk               (dft_clk              ),  //  clk100MHz-->PAD_OSC_IO(CLK)20MHZ ----> aou_top  [pmu_dummy_top ouput: assign dft_clk = ehs_pmu_clk]---> cpu[input],
-  .dmac0_wic_intr        (dmac0_wic_intr       ),  //  --->dmac_top[output]--->cpu[input]  来自DMAC的一个中断信号
-  .gpio_wic_intr         (1'b0                  ),  //  gpio_top[output] ---> aou_top[output] ----> cpu[input]  来自gpio apb外设的一个信号
-  .hmain0_cpu_m0_hrdata  (hmain0_cpu_m0_hrdata ),
-  .hmain0_cpu_m0_hready  (hmain0_cpu_m0_hready ),
-  .hmain0_cpu_m0_hresp   (hmain0_cpu_m0_hresp  ),
-  .hmain0_cpu_m1_hrdata  (hmain0_cpu_m1_hrdata ),
-  .hmain0_cpu_m1_hready  (hmain0_cpu_m1_hready ),
-  .hmain0_cpu_m1_hresp   (hmain0_cpu_m1_hresp  ),
-  .hmain0_cpu_m2_hrdata  (hmain0_cpu_m2_hrdata ),
-  .hmain0_cpu_m2_hready  (hmain0_cpu_m2_hready ),
-  .hmain0_cpu_m2_hresp   (hmain0_cpu_m2_hresp  ),
+  .cpu_padmux_jtg_tms_oe (cpu_padmux_jtg_tms_oe),   //jtag_tms_oen ，是cpu_padmux_jtg_tms_o信号的有效指示信�??
+  .padmux_cpu_jtg_tms_i  (padmux_cpu_jtg_tms_i ),   //jtag_tms_i，为2线制串行数据输入信号，空闲时为高电平，经过设置可用于同步复位调试模式   //connect outside  can inst a PAD module                                                 
+  .cpu_pmu_dfs_ack       (cpu_pmu_dfs_ack      ),   //output never mind  just pullout
+  .cpu_pmu_sleep_b       (cpu_pmu_sleep_b      ),   //output never mind  just pullout
+  .dft_clk               (dft_clk              ),   //  clk100MHz-->PAD_OSC_IO(CLK)20MHZ ----> aou_top  [pmu_dummy_top ouput: assign dft_clk = ehs_pmu_clk]---> cpu[input],
+  .dmac0_wic_intr        (dmac0_wic_intr       ),   //  --->dmac_top[output]--->cpu[input]  来自DMAC的一个中断信�??
+  .gpio_wic_intr         (1'b0                 ),   //  gpio_top[output] ---> aou_top[output] ----> cpu[input]  来自gpio apb外设的一个信�??
+  .hmain0_cpu_m0_hrdata  (hmain0_cpu_m0_hrdata ),   //master AHB signal, i
+  .hmain0_cpu_m0_hready  (hmain0_cpu_m0_hready ),   //master AHB signal, i
+  .hmain0_cpu_m0_hresp   (hmain0_cpu_m0_hresp  ),   //master AHB signal, i
+  .hmain0_cpu_m1_hrdata  (hmain0_cpu_m1_hrdata ),   //master AHB signal, i
+  .hmain0_cpu_m1_hready  (hmain0_cpu_m1_hready ),   //master AHB signal, i
+  .hmain0_cpu_m1_hresp   (hmain0_cpu_m1_hresp  ),   //master AHB signal, i
+  .hmain0_cpu_m2_hrdata  (hmain0_cpu_m2_hrdata ),   //master AHB signal, i
+  .hmain0_cpu_m2_hready  (hmain0_cpu_m2_hready ),   //master AHB signal, i
+  .hmain0_cpu_m2_hresp   (hmain0_cpu_m2_hresp  ),   //master AHB signal, i
   .lsbus_dummy0_intr     (lsbus_dummy0_intr    ),   //input assign intr=1'b0;
-  .lsbus_dummy1_intr     (lsbus_dummy1_intr    ),
-  .lsbus_dummy2_intr     (lsbus_dummy2_intr    ),
-  .lsbus_dummy3_intr     (lsbus_dummy3_intr    ),   //来自外设的中断信号
-  .main_dmemdummy0_intr  (main_dmemdummy0_intr ),  //input assign intr=1'b0;
-  .main_dummy0_intr      (main_dummy0_intr     ),  // input assign intr=1'b0;
-  .main_dummy1_intr      (/*main_dummy1_intr*/cpu0_mbx_intr ), //43
-  .main_dummy2_intr      (/* main_dummy2_intr */  1'b0 ), //44
-  .main_dummy3_intr      (/* main_dummy3_intr */  1'b0),
-  .main_imemdummy0_intr  (main_imemdummy0_intr ),  //input assign intr=1'b0
-  .pad_core_clk          (pad_core_clk         ), //  CLK20MHZ[input]---> aou_top[ehs_pmu_clk]--->cpu[input]
-  .pad_core_ctim_refclk  (pad_core_ctim_refclk ), //input assign = PAD module's CLK
-  .pad_core_rst_b        (pad_core_rst_b       ), // --->cpu[input]  assign sys_rst_b = pad_mcurst_b & wdt_pmu_rst_b;
-  .padmux_cpu_jtg_tclk   (padmux_cpu_jtg_tclk  ), // inout，是调试器产生的时钟信号
- 
-  .pmu_cpu_dfs_req       (pmu_cpu_dfs_req      ), // assign = 1'b0
-  .pmu_wic_intr          (pmu_wic_intr         ), //assign = 1'b0
-  .pwm_wic_intr          (pwm_wic_intr         ), //assign assign pwmint= pwm0_int | pwm1_int | pwm2_int | pwm3_int | pwm4_int | pwm5_int | int_fault;
-  .rtc_wic_intr          (rtc_wic_intr         ), //assign rtc0_vic_intr = intr_mask ? 1'b0 : (int_flag && ~pdu_aou_int_clr);
-  .scan_en               (scan_en              ), //assign scan_en = 1'b0;
-  .scan_mode             (scan_mode            ), //assign scan_mode = 1'b0;
-  .test_mode             (test_mode            ), //assign test_mode = 1'b0;
-  .tim0_wic_intr         (tim0_wic_intr        ),   //tim.v模块的一个中断输入
-  .tim1_wic_intr         (2'b0                 ),
-  .tim2_wic_intr         (tim2_wic_intr        ), //1'b0
-  .tim3_wic_intr         (2'b0        ),
-  .tim4_wic_intr         (tim4_wic_intr        ),
-  .tim5_wic_intr         (2'b0       ),
-  .tim6_wic_intr         (tim6_wic_intr        ),
-  .tim7_wic_intr         (2'b0        ), //time模块中断
-  .usi0_wic_intr         (usi0_wic_intr        ), //挂载在usi0下各种外设可能产生的中断
-  .usi1_wic_intr         (1'b0                 ), //连到REE CPU  1'b0
-  .usi2_wic_intr         (usi2_wic_intr        ), //外设的中断
-  .wdt_wic_intr          (wdt_wic_intr         ), 
-  
-  .core_pad_jdb_pm       (core_pad_jdb_pm      ),
-    .pad_cpu_rst_addr     (32'h00000000               )  //全部为正常工作模式
+  .lsbus_dummy1_intr     (lsbus_dummy1_intr    ),   //interrupt not use
+  .lsbus_dummy2_intr     (lsbus_dummy2_intr    ),   //interrupt not use
+  .lsbus_dummy3_intr     (lsbus_dummy3_intr    ),   //来自外设的中断信�??
+  .main_dmemdummy0_intr  (main_dmemdummy0_intr ),   //input assign intr=1'b0;
+  .main_dummy0_intr      (main_dummy0_intr     ),   // input assign intr=1'b0;
+  .main_dummy1_intr      (cpu0_mbx_intr        ),   //43
+  .main_dummy2_intr      (  1'b0               ),   //44
+  .main_dummy3_intr      (  1'b0               ),   //interrupt not use
+  .main_imemdummy0_intr  (main_imemdummy0_intr ),   //input assign intr=1'b0
+  .pad_core_clk          (pad_core_clk         ),   //  CLK20MHZ[input]---> aou_top[ehs_pmu_clk]--->cpu[input]
+  .pad_core_ctim_refclk  (pad_core_ctim_refclk ),   //input assign = PAD module's CLK
+  .pad_core_rst_b        (pad_core_rst_b       ),   // --->cpu[input]  assign sys_rst_b = pad_mcurst_b & wdt_pmu_rst_b;
+  .padmux_cpu_jtg_tclk   (padmux_cpu_jtg_tclk  ),   // inout，是调试器产生的时钟信号
+  .pmu_cpu_dfs_req       (pmu_cpu_dfs_req      ),   // assign = 1'b0
+  .pmu_wic_intr          (pmu_wic_intr         ),   //assign = 1'b0
+  .pwm_wic_intr          (pwm_wic_intr         ),   //assign assign pwmint= pwm0_int | pwm1_int | pwm2_int | pwm3_int | pwm4_int | pwm5_int | int_fault;
+  .rtc_wic_intr          (rtc_wic_intr         ),   //assign rtc0_vic_intr = intr_mask ? 1'b0 : (int_flag && ~pdu_aou_int_clr);
+  .scan_en               (scan_en              ),   //assign scan_en = 1'b0;
+  .scan_mode             (scan_mode            ),   //assign scan_mode = 1'b0;
+  .test_mode             (test_mode            ),   //assign test_mode = 1'b0;
+  .tim0_wic_intr         (tim0_wic_intr        ),   //tim.v模块的一个中断输�??
+  .tim1_wic_intr         (2'b0                 ),   //interrupt not use 
+  .tim2_wic_intr         (tim2_wic_intr        ),   //1'b0
+  .tim3_wic_intr         (2'b0                 ),   //interrupt not use
+  .tim4_wic_intr         (tim4_wic_intr        ),   //interrupt
+  .tim5_wic_intr         (2'b0                 ),   //interrupt not use
+  .tim6_wic_intr         (tim6_wic_intr        ),   //interrupt
+  .tim7_wic_intr         (2'b0                 ),   //time模块中断
+  .usi0_wic_intr         (usi0_wic_intr        ),   //挂载在usi0下各种外设可能产生的中断
+  .usi1_wic_intr         (1'b0                 ),   //连到REE CPU  1'b0
+  .usi2_wic_intr         (usi2_wic_intr        ),   //外设的中�??
+  .wdt_wic_intr          (wdt_wic_intr         ),   //interrupt
+  .core_pad_jdb_pm       (core_pad_jdb_pm      ),   //
+  .pad_cpu_rst_addr      (32'h00000000         )    //全部为正常工作模�??
 );
 core_top  x_cpu2_top (
- .apb0_dummy1_intr      (apb0_dummy1_intr     ),
- .apb0_dummy2_intr      (apb0_dummy2_intr     ),
- .apb0_dummy3_intr      (apb0_dummy3_intr     ),
- .apb0_dummy4_intr      (apb0_dummy4_intr     ),
- .apb0_dummy5_intr      (apb0_dummy5_intr     ),
- .apb0_dummy7_intr      (apb0_dummy7_intr     ),
- .apb0_dummy8_intr      (apb0_dummy8_intr     ),
- .apb0_dummy9_intr      (apb0_dummy9_intr     ),
- .apb1_dummy1_intr      (apb1_dummy1_intr     ),
- .apb1_dummy2_intr      (apb1_dummy2_intr     ),
- .apb1_dummy3_intr      (apb1_dummy3_intr     ),
- .apb1_dummy4_intr      (apb1_dummy4_intr     ),
- .apb1_dummy5_intr      (apb1_dummy5_intr     ),
- .apb1_dummy6_intr      (apb1_dummy6_intr     ),
- .apb1_dummy7_intr      (apb1_dummy7_intr     ),
- .apb1_dummy8_intr      (apb1_dummy8_intr     ),  // connect into pdu_top
- .bist0_mode            (bist0_mode           ),  //=1'b1
- .cpu_hmain0_m0_haddr   (mdummy0_hmain0_m4_haddr  ), //此处pc需要修改
- .cpu_hmain0_m0_hburst  (mdummy0_hmain0_m4_hburst ),
- .cpu_hmain0_m0_hprot   (mdummy0_hmain0_m4_hprot  ),
- .cpu_hmain0_m0_hsize   (mdummy0_hmain0_m4_hsize  ),
- .cpu_hmain0_m0_htrans  (mdummy0_hmain0_m4_htrans ),
- .cpu_hmain0_m0_hwdata  (mdummy0_hmain0_m4_hwdata ),
- .cpu_hmain0_m0_hwrite  (mdummy0_hmain0_m4_hwrite ),
- .cpu_hmain0_m1_haddr   (mdummy1_hmain0_m5_haddr  ),
- .cpu_hmain0_m1_hburst  (mdummy1_hmain0_m5_hburst ),
- .cpu_hmain0_m1_hprot   (mdummy1_hmain0_m5_hprot  ),
- .cpu_hmain0_m1_hsize   (mdummy1_hmain0_m5_hsize  ),
- .cpu_hmain0_m1_htrans  (mdummy1_hmain0_m5_htrans ),
- .cpu_hmain0_m1_hwdata  (mdummy1_hmain0_m5_hwdata ),
- .cpu_hmain0_m1_hwrite  (mdummy1_hmain0_m5_hwrite ),
- .cpu_hmain0_m2_haddr   (mdummy2_hmain0_m6_haddr  ),
- .cpu_hmain0_m2_hburst  (mdummy2_hmain0_m6_hburst ),
- .cpu_hmain0_m2_hprot   (mdummy2_hmain0_m6_hprot  ),
- .cpu_hmain0_m2_hsize   (mdummy2_hmain0_m6_hsize  ),
- .cpu_hmain0_m2_htrans  (mdummy2_hmain0_m6_htrans ),
- .cpu_hmain0_m2_hwdata  (mdummy2_hmain0_m6_hwdata ),
- .cpu_hmain0_m2_hwrite  (mdummy2_hmain0_m6_hwrite ),  //connect into pdu_top
- .cpu_padmux_jtg_tms_o  (cpu_padmux_jtg2_tms_o ),   //在tclk下降沿设置该信号，输出给外部调试器，cpu通过该接口告知用户cpu寄存器以及存储器内容（也就是软件可以获取并读取到cpu寄存器的值）
- .cpu_padmux_jtg_tms_oe (cpu_padmux_jtg2_tms_oe),  //jtag_tms_oen ，是cpu_padmux_jtg_tms_o信号的有效指示信号
- .padmux_cpu_jtg_tms_i  (padmux_cpu_jtg_tms_i ), //jtag_tms_i，为2线制串行数据输入信号，空闲时为高电平，经过设置可用于同步复位调试模式  
-                                                 //connect outside  can inst a PAD module
- .cpu_pmu_dfs_ack       (cpu_pmu2_dfs_ack      ),  //output never mind  just pullout
- .cpu_pmu_sleep_b       (cpu_pmu2_sleep_b      ),  //output never mind  just pullout
- .dft_clk               (dft_clk              ),  //  clk100MHz-->PAD_OSC_IO(CLK)20MHZ ----> aou_top  [pmu_dummy_top ouput: assign dft_clk = ehs_pmu_clk]---> cpu[input],
- .dmac0_wic_intr        (dmac0_wic_intr       ),  //  --->dmac_top[output]--->cpu[input]  来自DMAC的一个中断信号
- .gpio_wic_intr         (gpio_wic_intr        ),  //  gpio_top[output] ---> aou_top[output] ----> cpu[input]  来自gpio apb外设的一个信号
- .hmain0_cpu_m0_hrdata  (hmain0_mdummy0_m4_hrdata), 
- .hmain0_cpu_m0_hready  (hmain0_mdummy0_m4_hready),
- .hmain0_cpu_m0_hresp   (hmain0_mdummy0_m4_hresp ),
- .hmain0_cpu_m1_hrdata  (hmain0_mdummy1_m5_hrdata),
- .hmain0_cpu_m1_hready  (hmain0_mdummy1_m5_hready),
- .hmain0_cpu_m1_hresp   (hmain0_mdummy1_m5_hresp ),
- .hmain0_cpu_m2_hrdata  (hmain0_mdummy2_m6_hrdata),
- .hmain0_cpu_m2_hready  (hmain0_mdummy2_m6_hready),
- .hmain0_cpu_m2_hresp   (hmain0_mdummy2_m6_hresp ),
- .lsbus_dummy0_intr     (  lsbus_dummy0_intr  ),   //input assign intr=1'b0;
- .lsbus_dummy1_intr     (lsbus_dummy1_intr    ),
- .lsbus_dummy2_intr     (lsbus_dummy2_intr    ),
- .lsbus_dummy3_intr     (lsbus_dummy3_intr    ),   //来自外设的中断信号
- .main_dmemdummy0_intr  (main_dmemdummy0_intr ),  //input assign intr=1'b0;
- .main_dummy0_intr      (main_dummy0_intr     ),  // input assign intr=1'b0;
- .main_dummy1_intr      (/* main_dummy1_intr */   1'b0  ),
- .main_dummy2_intr      (/* main_dummy2_intr */  cpu1_mbx_intr /* 1'b0 */  ),
- .main_dummy3_intr      (/*main_dummy3_intr*/  1'b0  ),
- .main_imemdummy0_intr  (main_imemdummy0_intr ),  //input assign intr=1'b0
- .pad_core_clk          (pad_core_clk         ), //  CLK20MHZ[input]---> aou_top[ehs_pmu_clk]--->cpu[input]
- .pad_core_ctim_refclk  (pad_core_ctim_refclk ), //input assign = PAD module's CLK
- .pad_core_rst_b        (REE_rst_b), // --->cpu[input]  assign sys_rst_b = pad_mcurst_b & wdt_pmu_rst_b;
- .padmux_cpu_jtg_tclk   (padmux_cpu_jtg_tclk  ), // inout，是调试器产生的时钟信号
- 
- .pmu_cpu_dfs_req       (pmu_cpu_dfs_req      ), // assign = 1'b0
- .pmu_wic_intr          (pmu_wic_intr         ), //assign = 1'b0
- .pwm_wic_intr          (pwm_wic_intr         ), //assign assign pwmint= pwm0_int | pwm1_int | pwm2_int | pwm3_int | pwm4_int | pwm5_int | int_fault;
- .rtc_wic_intr          (rtc_wic_intr         ), //assign rtc0_vic_intr = intr_mask ? 1'b0 : (int_flag && ~pdu_aou_int_clr);
- .scan_en               (scan_en              ), //assign scan_en = 1'b0;
- .scan_mode             (scan_mode            ), //assign scan_mode = 1'b0;
- .test_mode             (test_mode            ), //assign test_mode = 1'b0;
- .tim0_wic_intr         (2'b0                 ),   //tim.v模块的一个中断输入
- .tim1_wic_intr         (tim1_wic_intr        ),
- .tim2_wic_intr         (2'b0        ),  //其余中断不会响应
- .tim3_wic_intr         (tim3_wic_intr        ),
- .tim4_wic_intr         (2'b0        ),
- .tim5_wic_intr         (tim5_wic_intr        ),
- .tim6_wic_intr         (2'b0        ),
- .tim7_wic_intr         (tim7_wic_intr        ), //time模块中断
- .usi0_wic_intr         (1'b0                 ), //挂载在usi0下各种外设可能产生的中断
- .usi1_wic_intr         (usi1_wic_intr        ), //连到REE CPU
- .usi2_wic_intr         (1'b0        ), //外设的中断
- .wdt_wic_intr          (1'b0                 ),        
-  
- .core_pad_jdb_pm       (core_pad_jdb_pm2      ),  //全部为正常工作模式
- .pad_cpu_rst_addr      (REE_rst_addr)
+ .apb0_dummy1_intr      (apb0_dummy1_intr         ),   //dummy interrupt
+ .apb0_dummy2_intr      (apb0_dummy2_intr         ),   //dummy interrupt
+ .apb0_dummy3_intr      (apb0_dummy3_intr         ),   //dummy interrupt
+ .apb0_dummy4_intr      (apb0_dummy4_intr         ),   //dummy interrupt
+ .apb0_dummy5_intr      (apb0_dummy5_intr         ),   //dummy interrupt
+ .apb0_dummy7_intr      (apb0_dummy7_intr         ),   //dummy interrupt
+ .apb0_dummy8_intr      (apb0_dummy8_intr         ),   //dummy interrupt
+ .apb0_dummy9_intr      (apb0_dummy9_intr         ),   //dummy interrupt
+ .apb1_dummy1_intr      (apb1_dummy1_intr         ),   //dummy interrupt
+ .apb1_dummy2_intr      (apb1_dummy2_intr         ),   //dummy interrupt
+ .apb1_dummy3_intr      (apb1_dummy3_intr         ),   //dummy interrupt
+ .apb1_dummy4_intr      (apb1_dummy4_intr         ),   //dummy interrupt
+ .apb1_dummy5_intr      (apb1_dummy5_intr         ),   //dummy interrupt
+ .apb1_dummy6_intr      (apb1_dummy6_intr         ),   //dummy interrupt
+ .apb1_dummy7_intr      (apb1_dummy7_intr         ),   //dummy interrupt
+ .apb1_dummy8_intr      (apb1_dummy8_intr         ),   // connect into pdu_top
+ .bist0_mode            (bist0_mode               ),   //=1'b1
+ .cpu_hmain0_m0_haddr   (mdummy0_hmain0_m4_haddr  ),   //此处pc�??要修�??
+ .cpu_hmain0_m0_hburst  (mdummy0_hmain0_m4_hburst ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m0_hprot   (mdummy0_hmain0_m4_hprot  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m0_hsize   (mdummy0_hmain0_m4_hsize  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m0_htrans  (mdummy0_hmain0_m4_htrans ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m0_hwdata  (mdummy0_hmain0_m4_hwdata ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m0_hwrite  (mdummy0_hmain0_m4_hwrite ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_haddr   (mdummy1_hmain0_m5_haddr  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_hburst  (mdummy1_hmain0_m5_hburst ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_hprot   (mdummy1_hmain0_m5_hprot  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_hsize   (mdummy1_hmain0_m5_hsize  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_htrans  (mdummy1_hmain0_m5_htrans ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_hwdata  (mdummy1_hmain0_m5_hwdata ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m1_hwrite  (mdummy1_hmain0_m5_hwrite ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_haddr   (mdummy2_hmain0_m6_haddr  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_hburst  (mdummy2_hmain0_m6_hburst ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_hprot   (mdummy2_hmain0_m6_hprot  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_hsize   (mdummy2_hmain0_m6_hsize  ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_htrans  (mdummy2_hmain0_m6_htrans ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_hwdata  (mdummy2_hmain0_m6_hwdata ),   //!: 2023/06/23 change to iopmp out
+ .cpu_hmain0_m2_hwrite  (mdummy2_hmain0_m6_hwrite ),   //connect into pdu_top
+ .cpu_padmux_jtg_tms_o  (cpu_padmux_jtg2_tms_o    ),   //在tclk下降沿设置该信号，输出给外部调试器，cpu通过该接口告知用户cpu寄存器以及存储器内容（也就是软件可以获取并读取到cpu寄存器的值）
+ .cpu_padmux_jtg_tms_oe (cpu_padmux_jtg2_tms_oe   ),   //jtag_tms_oen ，是cpu_padmux_jtg_tms_o信号的有效指示信�??
+ .padmux_cpu_jtg_tms_i  (padmux_cpu_jtg_tms_i     ),   //jtag_tms_i，为2线制串行数据输入信号，空闲时为高电平，经过设置可用于同步复位调试模式  /*connect outside  can inst a PAD module*/
+ .cpu_pmu_dfs_ack       (cpu_pmu2_dfs_ack         ),   //output never mind  just pullout
+ .cpu_pmu_sleep_b       (cpu_pmu2_sleep_b         ),   //output never mind  just pullout
+ .dft_clk               (dft_clk                  ),   //  clk100MHz-->PAD_OSC_IO(CLK)20MHZ ----> aou_top  [pmu_dummy_top ouput: assign dft_clk = ehs_pmu_clk]---> cpu[input],
+ .dmac0_wic_intr        (dmac0_wic_intr           ),   //  --->dmac_top[output]--->cpu[input]  来自DMAC的一个中断信�??
+ .gpio_wic_intr         (gpio_wic_intr            ),   //  gpio_top[output] ---> aou_top[output] ----> cpu[input]  来自gpio apb外设的一个信�??
+ .hmain0_cpu_m0_hrdata  (hmain0_mdummy0_m4_hrdata ),   //KEEP IT
+ .hmain0_cpu_m0_hready  (hmain0_mdummy0_m4_hready ),   //KEEP IT
+ .hmain0_cpu_m0_hresp   (hmain0_mdummy0_m4_hresp  ),   //KEEP IT
+ .hmain0_cpu_m1_hrdata  (hmain0_mdummy1_m5_hrdata ),   //KEEP IT
+ .hmain0_cpu_m1_hready  (hmain0_mdummy1_m5_hready ),   //KEEP IT
+ .hmain0_cpu_m1_hresp   (hmain0_mdummy1_m5_hresp  ),   //KEEP IT
+ .hmain0_cpu_m2_hrdata  (hmain0_mdummy2_m6_hrdata ),   //KEEP IT
+ .hmain0_cpu_m2_hready  (hmain0_mdummy2_m6_hready ),   //KEEP IT
+ .hmain0_cpu_m2_hresp   (hmain0_mdummy2_m6_hresp  ),   //KEEP IT
+ .lsbus_dummy0_intr     (    lsbus_dummy0_intr    ),   //input assign intr=1'b0;
+ .lsbus_dummy1_intr     (    lsbus_dummy1_intr    ),   //lsbus dummy interrupt
+ .lsbus_dummy2_intr     (    lsbus_dummy2_intr    ),   //lsbus dummy interrupt
+ .lsbus_dummy3_intr     (    lsbus_dummy3_intr    ),   //来自外设的中断信�??
+ .main_dmemdummy0_intr  (   main_dmemdummy0_intr  ),   //input assign intr=1'b0;
+ .main_dummy0_intr      (   main_dummy0_intr      ),   // input assign intr=1'b0;
+ .main_dummy1_intr      (   1'b0                  ),   //?interrupt not use
+ .main_dummy2_intr      (   cpu1_mbx_intr         ),   //mailbox interrupt
+ .main_dummy3_intr      (   iopmp_deny_intr       ),   //?iopmp_deny_intr(45)
+ .main_imemdummy0_intr  (   main_imemdummy0_intr  ),   //input assign intr=1'b0
+ .pad_core_clk          (   pad_core_clk          ),   //  CLK20MHZ[input]---> aou_top[ehs_pmu_clk]--->cpu[input]
+ .pad_core_ctim_refclk  (   pad_core_ctim_refclk  ),   //input assign = PAD module's CLK
+ .pad_core_rst_b        (   REE_rst_b             ),   // --->cpu[input]  assign sys_rst_b = pad_mcurst_b & wdt_pmu_rst_b;
+ .padmux_cpu_jtg_tclk   (   padmux_cpu_jtg_tclk   ),   // inout，是调试器产生的时钟信号
+ .pmu_cpu_dfs_req       (   pmu_cpu_dfs_req       ),   // assign = 1'b0
+ .pmu_wic_intr          (   pmu_wic_intr          ),   //assign = 1'b0
+ .pwm_wic_intr          (   pwm_wic_intr          ),   //assign assign pwmint= pwm0_int | pwm1_int | pwm2_int | pwm3_int | pwm4_int | pwm5_int | int_fault;
+ .rtc_wic_intr          (   rtc_wic_intr          ),   //assign rtc0_vic_intr = intr_mask ? 1'b0 : (int_flag && ~pdu_aou_int_clr);
+ .scan_en               (   scan_en               ),   //assign scan_en = 1'b0;
+ .scan_mode             (   scan_mode             ),   //assign scan_mode = 1'b0;
+ .test_mode             (   test_mode             ),   //assign test_mode = 1'b0;
+ .tim0_wic_intr         (   2'b0                  ),   //tim.v模块的一个中断输�??
+ .tim1_wic_intr         (   tim1_wic_intr         ),   //interrupt
+ .tim2_wic_intr         (   2'b0                  ),   //其余中断不会响应
+ .tim3_wic_intr         (   tim3_wic_intr         ),   //interrupt
+ .tim4_wic_intr         (   2'b0                  ),   //interrupt
+ .tim5_wic_intr         (   tim5_wic_intr         ),   //interrupt
+ .tim6_wic_intr         (   2'b0                  ),   //interrupt
+ .tim7_wic_intr         (   tim7_wic_intr         ),   //time模块中断
+ .usi0_wic_intr         (   1'b0                  ),   //挂载在usi0下各种外设可能产生的中断
+ .usi1_wic_intr         (   usi1_wic_intr         ),   //连到REE CPU
+ .usi2_wic_intr         (   1'b0                  ),   //外设的中�??
+ .wdt_wic_intr          (   1'b0                  ),   //
+ .core_pad_jdb_pm       (   core_pad_jdb_pm2      ),   //全部为正常工作模�??
+ .pad_cpu_rst_addr      (   REE_rst_addr          )    //
 );
 my_mailbox mbx(
-    .hrst_b     (pmu_dummy2_hrst_b),  
-    .hclk       (pmu_dummy2_hclk),
+    .hrst_b     (pmu_dummy2_hrst_b      ),  
+    .hclk       (pmu_dummy2_hclk        ),
     .hsel       (hmain0_dummy1_s8_hsel | hmain0_dummy2_s9_hsel),
-    .c0_hprot   (hmain0_dummy1_s8_hprot),
-    .c0_hsize   (hmain0_dummy1_s8_hsize),
+    .c0_hprot   (hmain0_dummy1_s8_hprot ),
+    .c0_hsize   (hmain0_dummy1_s8_hsize ),
     .c0_htrans  (hmain0_dummy1_s8_htrans),
     .c0_hwdata  (hmain0_dummy1_s8_hwdata),
     .c0_hwrite  (hmain0_dummy1_s8_hwrite),
-    .c0_haddr   (hmain0_dummy1_s8_haddr),
+    .c0_haddr   (hmain0_dummy1_s8_haddr ),
     .c0_hrdata  (dummy1_hmain0_s8_hrdata),
     .c0_hready  (dummy1_hmain0_s8_hready),
-    .c0_hresp   (dummy1_hmain0_s8_hresp),
-    .c0_tx_intr (cpu0_mbx_intr),
-    .c1_hprot   (hmain0_dummy2_s9_hprot),
-    .c1_hsize   (hmain0_dummy2_s9_hsize),
-    .c1_htrans  (hmain0_dummy2_s9_htrans),
-    .c1_hwdata  (hmain0_dummy2_s9_hwdata),
-    .c1_hwrite  (hmain0_dummy2_s9_hwrite),
-    .c1_haddr   (hmain0_dummy2_s9_haddr),
-    .c1_hrdata  (dummy2_hmain0_s9_hrdata),
-    .c1_hready  (dummy2_hmain0_s9_hready),
-    .c1_hresp   (dummy2_hmain0_s9_hresp),
-    .c1_tx_intr (cpu1_mbx_intr)
+    .c0_hresp   (dummy1_hmain0_s8_hresp ),
+    .c0_tx_intr (cpu0_mbx_intr          ),
+    .c1_hprot   (/* hmain0_dummy2_s9_hprot  */t_mbx_s9_hprot  ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_hsize   (/* hmain0_dummy2_s9_hsize  */t_mbx_s9_hsize  ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_htrans  (/* hmain0_dummy2_s9_htrans */t_mbx_s9_htrans ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_hwdata  (/* hmain0_dummy2_s9_hwdata */t_mbx_s9_hwdata ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_hwrite  (/* hmain0_dummy2_s9_hwrite */t_mbx_s9_hwrite ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_haddr   (/* hmain0_dummy2_s9_haddr  */t_mbx_s9_haddr  ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_hrdata  (/* dummy2_hmain0_s9_hrdata */t_mbx_s9_hrdata ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_hready  (/* dummy2_hmain0_s9_hready */t_mbx_s9_hready ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_hresp   (/* dummy2_hmain0_s9_hresp  */t_mbx_s9_hresp  ),//!2023/06/25, add slave router, connect to sahb_router
+    .c1_tx_intr (cpu1_mbx_intr          )
 );
+/* AHB path : CPU2 -> iompmp -> pdu_top -> sahb_router -> mailbox/iopmp */
+sahb_router s9_router(
+    .clk                     (pad_core_clk),              //clk
+    .resetn                  (PAD_MCURST),                //reset
+    .hmain0_dummy2_s9_hprot  (hmain0_dummy2_s9_hprot),    //i, origin slave signals, from pdu
+    .hmain0_dummy2_s9_hsize  (hmain0_dummy2_s9_hsize),    //i, origin slave signals, from pdu
+    .hmain0_dummy2_s9_htrans (hmain0_dummy2_s9_htrans),   //i, origin slave signals, from pdu
+    .hmain0_dummy2_s9_hwdata (hmain0_dummy2_s9_hwdata),   //i, origin slave signals, from pdu
+    .hmain0_dummy2_s9_hwrite (hmain0_dummy2_s9_hwrite),   //i, origin slave signals, from pdu
+    .hmain0_dummy2_s9_haddr  (hmain0_dummy2_s9_haddr),    //i, origin slave signals, from pdu
+    .dummy2_hmain0_s9_hrdata (dummy2_hmain0_s9_hrdata),   //o, origin slave signals, to pdu
+    .dummy2_hmain0_s9_hready (dummy2_hmain0_s9_hready),   //o, origin slave signals, to pdu
+    .dummy2_hmain0_s9_hresp  (dummy2_hmain0_s9_hresp),    //o, origin slave signals, to pdu
+    .mbx_s9_hprot            (t_mbx_s9_hprot),            //o, to mailbox
+    .mbx_s9_hsize            (t_mbx_s9_hsize),            //o, to mailbox
+    .mbx_s9_htrans           (t_mbx_s9_htrans),           //o, to mailbox
+    .mbx_s9_hwdata           (t_mbx_s9_hwdata),           //o, to mailbox
+    .mbx_s9_hwrite           (t_mbx_s9_hwrite),           //o, to mailbox
+    .mbx_s9_haddr            (t_mbx_s9_haddr),            //o, to mailbox
+    .mbx_s9_hrdata           (t_mbx_s9_hrdata),           //in, from mailbox
+    .mbx_s9_hready           (t_mbx_s9_hready),           //in, from mailbox
+    .mbx_s9_hresp            (t_mbx_s9_hresp),            //in, from mailbox
+    .iopmp_s9_hprot          (t_iopmp_s9_hprot),          //o, to iopmp
+    .iopmp_s9_hsize          (t_iopmp_s9_hsize),          //o, to iopmp
+    .iopmp_s9_htrans         (t_iopmp_s9_htrans),         //o, to iopmp
+    .iopmp_s9_hwdata         (t_iopmp_s9_hwdata),         //o, to iopmp
+    .iopmp_s9_hwrite         (t_iopmp_s9_hwrite),         //o, to iopmp
+    .iopmp_s9_haddr          (t_iopmp_s9_haddr),          //o, to iopmp
+    .iopmp_s9_hrdata         (t_iopmp_s9_hrdata),         //in, from iopmp
+    .iopmp_s9_hready         (t_iopmp_s9_hready),         //in, from iopmp
+    .iopmp_s9_hresp          (t_iopmp_s9_hresp)           //in, from iopmp
+);
+my_iopmp iopmp(
+  .clk                        (pad_core_clk               ),   //clk, 20M
+  .resetn                     (REE_rst_b                  ),   //Global Reset, keep with cpu2
+  .access_deny_intr           (iopmp_deny_intr            ),   //access_deny_interrupt
+  .iopmp_haddr                (t_iopmp_s9_haddr           ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hprot                (t_iopmp_s9_hprot           ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hsize                (t_iopmp_s9_hsize           ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_htrans               (t_iopmp_s9_htrans          ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hwdata               (t_iopmp_s9_hwdata          ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hwrite               (t_iopmp_s9_hwrite          ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hrdata               (t_iopmp_s9_hrdata          ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hready               (t_iopmp_s9_hready          ),   //share S9 AHB with mailbox, connect to sahb_router
+  .iopmp_hresp                (t_iopmp_s9_hresp           ),   //share S9 AHB with mailbox, connect to sahb_router
+  .cpu_hmain0_m0_haddr        (mdummy0_hmain0_m4_haddr    ),   //in, from CPU 2
+  .cpu_hmain0_m0_hburst       (mdummy0_hmain0_m4_hburst   ),   //in, from CPU 2
+  .cpu_hmain0_m0_hprot        (mdummy0_hmain0_m4_hprot    ),   //in, from CPU 2
+  .cpu_hmain0_m0_hsize        (mdummy0_hmain0_m4_hsize    ),   //in, from CPU 2
+  .cpu_hmain0_m0_htrans       (mdummy0_hmain0_m4_htrans   ),   //in, from CPU 2
+  .cpu_hmain0_m0_hwdata       (mdummy0_hmain0_m4_hwdata   ),   //in, from CPU 2
+  .cpu_hmain0_m0_hwrite       (mdummy0_hmain0_m4_hwrite   ),   //in, from CPU 2
+  .cpu_hmain0_m1_haddr        (mdummy1_hmain0_m5_haddr    ),   //in, from CPU 2
+  .cpu_hmain0_m1_hburst       (mdummy1_hmain0_m5_hburst   ),   //in, from CPU 2
+  .cpu_hmain0_m1_hprot        (mdummy1_hmain0_m5_hprot    ),   //in, from CPU 2
+  .cpu_hmain0_m1_hsize        (mdummy1_hmain0_m5_hsize    ),   //in, from CPU 2
+  .cpu_hmain0_m1_htrans       (mdummy1_hmain0_m5_htrans   ),   //in, from CPU 2
+  .cpu_hmain0_m1_hwdata       (mdummy1_hmain0_m5_hwdata   ),   //in, from CPU 2
+  .cpu_hmain0_m1_hwrite       (mdummy1_hmain0_m5_hwrite   ),   //in, from CPU 2
+  .cpu_hmain0_m2_haddr        (mdummy2_hmain0_m6_haddr    ),   //in, from CPU 2
+  .cpu_hmain0_m2_hburst       (mdummy2_hmain0_m6_hburst   ),   //in, from CPU 2
+  .cpu_hmain0_m2_hprot        (mdummy2_hmain0_m6_hprot    ),   //in, from CPU 2
+  .cpu_hmain0_m2_hsize        (mdummy2_hmain0_m6_hsize    ),   //in, from CPU 2
+  .cpu_hmain0_m2_htrans       (mdummy2_hmain0_m6_htrans   ),   //in, from CPU 2
+  .cpu_hmain0_m2_hwdata       (mdummy2_hmain0_m6_hwdata   ),   //in, from CPU 2
+  .cpu_hmain0_m2_hwrite       (mdummy2_hmain0_m6_hwrite   ),   //in, from CPU 2
+  .iopmp_cpu_hmain0_m0_haddr  (iopmp_cpu_hmain0_m0_haddr  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m0_hburst (iopmp_cpu_hmain0_m0_hburst ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m0_hprot  (iopmp_cpu_hmain0_m0_hprot  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m0_hsize  (iopmp_cpu_hmain0_m0_hsize  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m0_htrans (iopmp_cpu_hmain0_m0_htrans ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m0_hwdata (iopmp_cpu_hmain0_m0_hwdata ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m0_hwrite (iopmp_cpu_hmain0_m0_hwrite ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_haddr  (iopmp_cpu_hmain0_m1_haddr  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_hburst (iopmp_cpu_hmain0_m1_hburst ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_hprot  (iopmp_cpu_hmain0_m1_hprot  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_hsize  (iopmp_cpu_hmain0_m1_hsize  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_htrans (iopmp_cpu_hmain0_m1_htrans ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_hwdata (iopmp_cpu_hmain0_m1_hwdata ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m1_hwrite (iopmp_cpu_hmain0_m1_hwrite ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_haddr  (iopmp_cpu_hmain0_m2_haddr  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_hburst (iopmp_cpu_hmain0_m2_hburst ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_hprot  (iopmp_cpu_hmain0_m2_hprot  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_hsize  (iopmp_cpu_hmain0_m2_hsize  ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_htrans (iopmp_cpu_hmain0_m2_htrans ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_hwdata (iopmp_cpu_hmain0_m2_hwdata ),   //out, to pdu_top
+  .iopmp_cpu_hmain0_m2_hwrite (iopmp_cpu_hmain0_m2_hwrite )    //out, to pdu_top
+);
+
 retu_top  x_retu_top (
   .hmain0_ismc_s0_haddr  (hmain0_ismc_s0_haddr ),
   .hmain0_ismc_s0_hprot  (hmain0_ismc_s0_hprot ),
@@ -1468,7 +1596,7 @@ retu_top  x_retu_top (
   .smc_hmain0_s4_hrdata  (smc_hmain0_s4_hrdata ),
   .smc_hmain0_s4_hready  (smc_hmain0_s4_hready ),
   .smc_hmain0_s4_hresp   (smc_hmain0_s4_hresp  ),
-    //40个信号
+    //40个信�??
   .hmain0_dummy3_s11_haddr  (hmain0_dummy3_s11_haddr ),     
   .hmain0_dummy3_s11_hprot  (hmain0_dummy3_s11_hprot ),    
   .hmain0_dummy3_s11_hsel   (hmain0_dummy3_s11_hsel  ),     
@@ -1535,7 +1663,7 @@ PAD_DIG_IO  x_PAD_MCURST (
   .PAD          (PAD_MCURST  )
 );
 assign cpu_padmux_jtg_tms_oen = ~cpu_padmux_jtg_tms_oe; 
-assign cpu_padmux_jtg_tms_ien = cpu_padmux_jtg_tms_oe;  //cpu_padmux_jtg_tms_oe是cpu指示cpu_padmux_jtg_tms_o信号有效的使能信�??
+assign cpu_padmux_jtg_tms_ien = cpu_padmux_jtg_tms_oe;  //cpu_padmux_jtg_tms_oe是cpu指示cpu_padmux_jtg_tms_o信号有效的使能信�????
 //理解为外部调试接口模块，与CPU之间交互调试信号
 PAD_DIG_IO  x_PAD_JTAG_TMS (  
   .ID                     (padmux_cpu_jtg_tms_i  ),
@@ -1550,14 +1678,14 @@ PAD_DIG_IO  x_PAD_JTAG_TCLK (
   .IEN                 (1'b0               ), 
   .OD                  (1'b0               ),
   .OEN                 (1'b1               ),
-  .PAD                 (PAD_JTAG_TCLK      ) //assign PAD = OEN ? 1'bz : OD; == 1'bz，作为input，由调试器输�??
+  .PAD                 (PAD_JTAG_TCLK      ) //assign PAD = OEN ? 1'bz : OD; == 1'bz，作为input，由调试器输�????
 );
 PAD_DIG_IO  x_PAD_GPIO_0 (
   .ID                      (ioctl_gpio_ext_porta[0]),
   .IEN                     (pad_gpio_ien[0]        ),
-  .OD                      (gpio_ioctl_porta_dr[0] ), //在 pad 信号是输出的情况下，其是 pad的信号来源
+  .OD                      (gpio_ioctl_porta_dr[0] ), //�?? pad 信号是输出的情况下，其是 pad的信号来�??
   .OEN                     (pad_gpio_oen[0]        ),
-  .PAD                     (PAD_GPIO_0             )  //这是片选信号？ 将其连接到外部 flash上去？
+  .PAD                     (PAD_GPIO_0             )  //这是片�?�信号？ 将其连接到外�?? flash上去�??
 );
 PAD_DIG_IO  x_PAD_GPIO_1 (
   .ID                      (ioctl_gpio_ext_porta[1]),
@@ -1898,14 +2026,14 @@ PAD_DIG_IO  x_PAD_USI0_SD1 (
   .IEN                 (usi0_ioctl_sd1_ie_n),
   .OD                  (usi0_ioctl_sd1_out ),
   .OEN                 (usi0_ioctl_sd1_oe_n),
-  .PAD                 (PAD_USI0_SD1       )  //include spi_mi，最 top 的input，
+  .PAD                 (PAD_USI0_SD1       )  //include spi_mi，最 top 的input�??
 );
 PAD_DIG_IO  x_PAD_USI0_NSS (
   .ID                  (ioctl_usi0_nss_in  ),
   .IEN                 (usi0_ioctl_nss_ie_n),
   .OD                  (usi0_ioctl_nss_out ),
   .OEN                 (usi0_ioctl_nss_oe_n),
-  .PAD                 (PAD_USI0_NSS       ) //由此赋值给 usi0输出
+  .PAD                 (PAD_USI0_NSS       ) //由此赋�?�给 usi0输出
 );
 PAD_DIG_IO  x_PAD_USI1_SCLK (
   .ID                   (ioctl_usi1_sclk_in  ),
@@ -1942,7 +2070,7 @@ PAD_DIG_IO  x_PAD_USI2_SCLK (
   .OEN                  (usi2_ioctl_sclk_oe_n),
   .PAD                  (PAD_USI2_SCLK       )
 );
-//增加原语，并且将该信号不要引到xdc文件中
+//增加原语，并且将该信号不要引到xdc文件�??
   STARTUPE2 #(
       .PROG_USR("FALSE"),  // Activate program event security feature. Requires encrypted bitstreams.
       .SIM_CCLK_FREQ(0.0)  // Set the Configuration Clock Frequency(ns) for simulation.

@@ -18,7 +18,8 @@ module mailbox_channel(
     /*TRANSFER DATA*/
     /*TRANSFER INSTRUCTION*/
     output      [31:0]   ch_ctrl,
-    output      [31:0]   ch_status
+    output      [31:0]   ch_status,
+    output      [31:0]   ch_data
 );
 /*
 *CTRL REG
@@ -27,7 +28,8 @@ reg         INT_ctrl_bit;       /*Interrupt from particular channel*/
 reg [1:0]   mailbox_mode;       /*01: transfer data; 10:transfer addresss; 11:transfer command */
 reg [13:0]  len_data;           /*transferring data length*/
 reg         read_ok;            /*0: NOT read by destination core; 1:read by destination core*/
-reg [13:0]  ctrl_reserved = 0;  /*reserved*/
+reg         mbx_addrmode_write; /*0: read; 1:write*/
+reg [12:0]  ctrl_reserved = 0;  /*reserved*/
                                /*
 *DATA REG
 */
@@ -42,60 +44,41 @@ reg STS_bit; /*1: channel is used for inter-processor communication*/
 */
 always@(posedge clk) begin
     if(~rstn)begin
-        INT_ctrl_bit  <= 1'b0;
-        mailbox_mode  <= 2'b0; 
-        len_data      <= 14'b0;
-        read_ok       <= 1'b0;
-        ctrl_reserved <= 14'b0;
-        data_reg      <= 32'b0;
-        INT_bit       <= 1'b0;
-        STS_bit       <= 1'b0;
+        INT_ctrl_bit       <= 1'b0;
+        mailbox_mode       <= 2'b0; 
+        len_data           <= 14'b0;
+        read_ok            <= 1'b0;
+        mbx_addrmode_write <= 1'b0;
+        ctrl_reserved      <= 14'b0;
+        data_reg           <= 32'b0;
+        INT_bit            <= 1'b0;
+        STS_bit            <= 1'b0;
     end
     else begin
-/*         //ctrl
-        INT_ctrl_bit  <= INT_ctrl_bit  | wdata[31]    & {wen[0]};
-        mailbox_mode  <= mailbox_mode  | wdata[30:29] & {2{wen[0]}};
-        len_data      <= len_data      | wdata[28:15] & {14{wen[0]}};
-        read_ok       <= read_ok       | wdata[14]    & {wen[0]};
-        ctrl_reserved <= ctrl_reserved | wdata[13:0]  & {15{wen[0]}};
-        //data
-        data_reg      <= data_reg      | wdata[31:0]  & {32{wen[1]}};
-        //status
-        INT_bit       <= clear_intr ? 1'b0 : (INT_bit | wdata[1] & wen[2]);
-        STS_bit       <= STS_bit       | wdata[0] & wen[2]; */
-        INT_ctrl_bit  <= wen[0] ? wdata[31] : INT_ctrl_bit;
-        mailbox_mode  <= wen[0] ? wdata[30:29] : mailbox_mode;
-        len_data      <= wen[0] ? wdata[28:15] : len_data;
-        read_ok       <= wen[0] ? wdata[14] : read_ok;
-        ctrl_reserved <= wen[0] ? wdata[13:0] : ctrl_reserved;
-
-        data_reg      <= wen[1] ? wdata[31:0] : data_reg;
-
-        INT_bit       <= clear_intr ? 1'b0 : (wen[2] ? wdata[1] : INT_bit);
-        STS_bit       <= wen[2] ? wdata[0] : STS_bit; 
+        INT_ctrl_bit       <= wen[0]     ? wdata[31]    : INT_ctrl_bit;
+        mailbox_mode       <= wen[0]     ? wdata[30:29] : mailbox_mode;
+        len_data           <= wen[0]     ? wdata[28:15] : len_data;
+        read_ok            <= wen[0]     ? wdata[14]    : read_ok;
+        mbx_addrmode_write <= wen[0]     ? wdata[13]    : mbx_addrmode_write;
+        ctrl_reserved      <= wen[0]     ? wdata[12:0]  : ctrl_reserved;
+        data_reg           <= wen[1]     ? wdata[31:0]  : data_reg;
+        INT_bit            <= clear_intr ? 1'b0         : (wen[2] ? wdata[1] : INT_bit);
+        STS_bit            <= wen[2]     ? wdata[0]     : STS_bit;
     end
 end
 
-/*always @(*) begin
-    case(ren)
-        001:     rdata = {INT_ctrl_bit, mailbox_mode, len_data, read_ok, 14'b0};
-        010:     rdata = data_reg;
-        100:     rdata = {30'b0, INT_bit, STS_bit};
-        default: rdata = 32'b0;
-    endcase
-end*/
 always @(*) begin
     case(ren)
         3'b000:  rdata <= 32'b0;
-        3'b001:  rdata <= {INT_ctrl_bit, mailbox_mode, len_data, read_ok, 14'b0};
+        3'b001:  rdata <= {INT_ctrl_bit, mailbox_mode, len_data, read_ok, mbx_addrmode_write, 13'b0};
         3'b010:  rdata <= data_reg;
         3'b100:  rdata <= {30'b0, INT_bit, STS_bit};
         default: rdata <= 32'b0;
     endcase
 end
-//assign rdata = {{INT_ctrl_bit, mailbox_mode, len_data, read_ok, 14'b0} & {32{ren[0]}}} | {data_reg & {32{ren[1]}}} | {{30'b0, INT_bit, STS_bit} & {32{ren[2]}}};
 
-assign ch_ctrl         = {INT_ctrl_bit, mailbox_mode, len_data, read_ok, 14'b0};
-assign ch_status       = {30'b0, INT_bit, STS_bit};
-assign int_flag        = INT_ctrl_bit && INT_bit;
+assign ch_ctrl   = {INT_ctrl_bit, mailbox_mode, len_data, read_ok, mbx_addrmode_write, 13'b0};
+assign ch_status = {30'b0, INT_bit, STS_bit};
+assign ch_data   = data_reg;
+assign int_flag  = INT_ctrl_bit && INT_bit;
 endmodule
