@@ -33,6 +33,7 @@ void mbx_ch0_irqhandler(int idx)
         *(volatile uint32_t *)0x2003f004     = mailbox_ctrl  ;
         *(volatile uint32_t *)0x2003f008     = mailbox_data  ;
         *(volatile uint32_t *)0x2003f00C     = mailbox_status;
+		printf("Inter-communication Data is %x", mailbox_data);
     }
     else if(mailbox_mode == 0x2){ //address mode
     //数据用mailbox传回
@@ -40,12 +41,14 @@ void mbx_ch0_irqhandler(int idx)
         *(volatile uint32_t *) CH0_CTRL_ADDR   = 0xA0008000;
         *(volatile uint32_t *) CH0_DATA_ADDR   = command_data;
         *(volatile uint32_t *) CH0_STATUS_ADDR = 0x3;
+		printf("Inter-communication Address Data is %x", command_data);
     }
     else if(mailbox_mode == 0x3){ //command mode
         *(volatile uint32_t *)0x2003f014     = mailbox_ctrl  ;
         *(volatile uint32_t *)0x2003f018     = mailbox_data  ;
         *(volatile uint32_t *)0x2003f01C     = mailbox_status;
     }
+	*(volatile uint32_t *) CH0_CTRL_ADDR = CLEAR_INT_CMD;
 }
 
 void mbx_ch0_initialize(int32_t idx)

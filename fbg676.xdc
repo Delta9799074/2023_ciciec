@@ -78,8 +78,10 @@ set_property -dict {PACKAGE_PIN R5 IOSTANDARD LVCMOS33} [get_ports PAD_GPIO_4]
 
 
 ## UART
-set_property -dict {PACKAGE_PIN F23 IOSTANDARD LVCMOS33} [get_ports PAD_USI0_SD0]
-set_property -dict {PACKAGE_PIN H19 IOSTANDARD LVCMOS33} [get_ports PAD_USI0_SCLK]
+# set_property -dict {PACKAGE_PIN F23 IOSTANDARD LVCMOS33} [get_ports PAD_USI0_SD0]
+# set_property -dict {PACKAGE_PIN H19 IOSTANDARD LVCMOS33} [get_ports PAD_USI0_SCLK]
+set_property -dict {PACKAGE_PIN H19 IOSTANDARD LVCMOS33} [get_ports PAD_USI0_SD0];  #txd
+set_property -dict {PACKAGE_PIN F23 IOSTANDARD LVCMOS33} [get_ports PAD_USI0_SCLK]; #rxd
 
 
 
@@ -147,3 +149,61 @@ set_property CFGBVS VCCO [current_design]
 
 # set_false_path -from [get_clocks -of_objects [get_pins u_clk_wiz_0/inst/mmcm_adv_inst/CLKOUT0]] -to [get_pins x_cpu1_top/CPU/x_cr_tcipif_top/x_cr_coretim_top/refclk_ff1_reg/D]
 # set_false_path -from [get_clocks -of_objects [get_pins u_clk_wiz_0/inst/mmcm_adv_inst/CLKOUT0]] -to [get_pins x_cpu2_top/CPU/x_cr_tcipif_top/x_cr_coretim_top/refclk_ff1_reg/D]
+create_debug_core u_ila_0 ila
+set_property ALL_PROBE_SAME_MU true [get_debug_cores u_ila_0]
+set_property ALL_PROBE_SAME_MU_CNT 1 [get_debug_cores u_ila_0]
+set_property C_ADV_TRIGGER false [get_debug_cores u_ila_0]
+set_property C_DATA_DEPTH 2048 [get_debug_cores u_ila_0]
+set_property C_EN_STRG_QUAL false [get_debug_cores u_ila_0]
+set_property C_INPUT_PIPE_STAGES 0 [get_debug_cores u_ila_0]
+set_property C_TRIGIN_EN false [get_debug_cores u_ila_0]
+set_property C_TRIGOUT_EN false [get_debug_cores u_ila_0]
+set_property port_width 1 [get_debug_ports u_ila_0/clk]
+connect_debug_port u_ila_0/clk [get_nets [list u_clk_wiz_0/inst/clk_out1]]
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe0]
+set_property port_width 32 [get_debug_ports u_ila_0/probe0]
+connect_debug_port u_ila_0/probe0 [get_nets [list {iopmp/ahb_exp_addr[0]} {iopmp/ahb_exp_addr[1]} {iopmp/ahb_exp_addr[2]} {iopmp/ahb_exp_addr[3]} {iopmp/ahb_exp_addr[4]} {iopmp/ahb_exp_addr[5]} {iopmp/ahb_exp_addr[6]} {iopmp/ahb_exp_addr[7]} {iopmp/ahb_exp_addr[8]} {iopmp/ahb_exp_addr[9]} {iopmp/ahb_exp_addr[10]} {iopmp/ahb_exp_addr[11]} {iopmp/ahb_exp_addr[12]} {iopmp/ahb_exp_addr[13]} {iopmp/ahb_exp_addr[14]} {iopmp/ahb_exp_addr[15]} {iopmp/ahb_exp_addr[16]} {iopmp/ahb_exp_addr[17]} {iopmp/ahb_exp_addr[18]} {iopmp/ahb_exp_addr[19]} {iopmp/ahb_exp_addr[20]} {iopmp/ahb_exp_addr[21]} {iopmp/ahb_exp_addr[22]} {iopmp/ahb_exp_addr[23]} {iopmp/ahb_exp_addr[24]} {iopmp/ahb_exp_addr[25]} {iopmp/ahb_exp_addr[26]} {iopmp/ahb_exp_addr[27]} {iopmp/ahb_exp_addr[28]} {iopmp/ahb_exp_addr[29]} {iopmp/ahb_exp_addr[30]} {iopmp/ahb_exp_addr[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe1]
+set_property port_width 32 [get_debug_ports u_ila_0/probe1]
+connect_debug_port u_ila_0/probe1 [get_nets [list {mbx/ch0_status[0]} {mbx/ch0_status[1]} {mbx/ch0_status[2]} {mbx/ch0_status[3]} {mbx/ch0_status[4]} {mbx/ch0_status[5]} {mbx/ch0_status[6]} {mbx/ch0_status[7]} {mbx/ch0_status[8]} {mbx/ch0_status[9]} {mbx/ch0_status[10]} {mbx/ch0_status[11]} {mbx/ch0_status[12]} {mbx/ch0_status[13]} {mbx/ch0_status[14]} {mbx/ch0_status[15]} {mbx/ch0_status[16]} {mbx/ch0_status[17]} {mbx/ch0_status[18]} {mbx/ch0_status[19]} {mbx/ch0_status[20]} {mbx/ch0_status[21]} {mbx/ch0_status[22]} {mbx/ch0_status[23]} {mbx/ch0_status[24]} {mbx/ch0_status[25]} {mbx/ch0_status[26]} {mbx/ch0_status[27]} {mbx/ch0_status[28]} {mbx/ch0_status[29]} {mbx/ch0_status[30]} {mbx/ch0_status[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe2]
+set_property port_width 32 [get_debug_ports u_ila_0/probe2]
+connect_debug_port u_ila_0/probe2 [get_nets [list {mbx/ch0_data[0]} {mbx/ch0_data[1]} {mbx/ch0_data[2]} {mbx/ch0_data[3]} {mbx/ch0_data[4]} {mbx/ch0_data[5]} {mbx/ch0_data[6]} {mbx/ch0_data[7]} {mbx/ch0_data[8]} {mbx/ch0_data[9]} {mbx/ch0_data[10]} {mbx/ch0_data[11]} {mbx/ch0_data[12]} {mbx/ch0_data[13]} {mbx/ch0_data[14]} {mbx/ch0_data[15]} {mbx/ch0_data[16]} {mbx/ch0_data[17]} {mbx/ch0_data[18]} {mbx/ch0_data[19]} {mbx/ch0_data[20]} {mbx/ch0_data[21]} {mbx/ch0_data[22]} {mbx/ch0_data[23]} {mbx/ch0_data[24]} {mbx/ch0_data[25]} {mbx/ch0_data[26]} {mbx/ch0_data[27]} {mbx/ch0_data[28]} {mbx/ch0_data[29]} {mbx/ch0_data[30]} {mbx/ch0_data[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe3]
+set_property port_width 32 [get_debug_ports u_ila_0/probe3]
+connect_debug_port u_ila_0/probe3 [get_nets [list {mbx/ch1_status[0]} {mbx/ch1_status[1]} {mbx/ch1_status[2]} {mbx/ch1_status[3]} {mbx/ch1_status[4]} {mbx/ch1_status[5]} {mbx/ch1_status[6]} {mbx/ch1_status[7]} {mbx/ch1_status[8]} {mbx/ch1_status[9]} {mbx/ch1_status[10]} {mbx/ch1_status[11]} {mbx/ch1_status[12]} {mbx/ch1_status[13]} {mbx/ch1_status[14]} {mbx/ch1_status[15]} {mbx/ch1_status[16]} {mbx/ch1_status[17]} {mbx/ch1_status[18]} {mbx/ch1_status[19]} {mbx/ch1_status[20]} {mbx/ch1_status[21]} {mbx/ch1_status[22]} {mbx/ch1_status[23]} {mbx/ch1_status[24]} {mbx/ch1_status[25]} {mbx/ch1_status[26]} {mbx/ch1_status[27]} {mbx/ch1_status[28]} {mbx/ch1_status[29]} {mbx/ch1_status[30]} {mbx/ch1_status[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe4]
+set_property port_width 32 [get_debug_ports u_ila_0/probe4]
+connect_debug_port u_ila_0/probe4 [get_nets [list {mbx/ch0_ctrl[0]} {mbx/ch0_ctrl[1]} {mbx/ch0_ctrl[2]} {mbx/ch0_ctrl[3]} {mbx/ch0_ctrl[4]} {mbx/ch0_ctrl[5]} {mbx/ch0_ctrl[6]} {mbx/ch0_ctrl[7]} {mbx/ch0_ctrl[8]} {mbx/ch0_ctrl[9]} {mbx/ch0_ctrl[10]} {mbx/ch0_ctrl[11]} {mbx/ch0_ctrl[12]} {mbx/ch0_ctrl[13]} {mbx/ch0_ctrl[14]} {mbx/ch0_ctrl[15]} {mbx/ch0_ctrl[16]} {mbx/ch0_ctrl[17]} {mbx/ch0_ctrl[18]} {mbx/ch0_ctrl[19]} {mbx/ch0_ctrl[20]} {mbx/ch0_ctrl[21]} {mbx/ch0_ctrl[22]} {mbx/ch0_ctrl[23]} {mbx/ch0_ctrl[24]} {mbx/ch0_ctrl[25]} {mbx/ch0_ctrl[26]} {mbx/ch0_ctrl[27]} {mbx/ch0_ctrl[28]} {mbx/ch0_ctrl[29]} {mbx/ch0_ctrl[30]} {mbx/ch0_ctrl[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
+set_property port_width 32 [get_debug_ports u_ila_0/probe5]
+connect_debug_port u_ila_0/probe5 [get_nets [list {mbx/ch1_ctrl[0]} {mbx/ch1_ctrl[1]} {mbx/ch1_ctrl[2]} {mbx/ch1_ctrl[3]} {mbx/ch1_ctrl[4]} {mbx/ch1_ctrl[5]} {mbx/ch1_ctrl[6]} {mbx/ch1_ctrl[7]} {mbx/ch1_ctrl[8]} {mbx/ch1_ctrl[9]} {mbx/ch1_ctrl[10]} {mbx/ch1_ctrl[11]} {mbx/ch1_ctrl[12]} {mbx/ch1_ctrl[13]} {mbx/ch1_ctrl[14]} {mbx/ch1_ctrl[15]} {mbx/ch1_ctrl[16]} {mbx/ch1_ctrl[17]} {mbx/ch1_ctrl[18]} {mbx/ch1_ctrl[19]} {mbx/ch1_ctrl[20]} {mbx/ch1_ctrl[21]} {mbx/ch1_ctrl[22]} {mbx/ch1_ctrl[23]} {mbx/ch1_ctrl[24]} {mbx/ch1_ctrl[25]} {mbx/ch1_ctrl[26]} {mbx/ch1_ctrl[27]} {mbx/ch1_ctrl[28]} {mbx/ch1_ctrl[29]} {mbx/ch1_ctrl[30]} {mbx/ch1_ctrl[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
+set_property port_width 32 [get_debug_ports u_ila_0/probe6]
+connect_debug_port u_ila_0/probe6 [get_nets [list {mbx/ch1_data[0]} {mbx/ch1_data[1]} {mbx/ch1_data[2]} {mbx/ch1_data[3]} {mbx/ch1_data[4]} {mbx/ch1_data[5]} {mbx/ch1_data[6]} {mbx/ch1_data[7]} {mbx/ch1_data[8]} {mbx/ch1_data[9]} {mbx/ch1_data[10]} {mbx/ch1_data[11]} {mbx/ch1_data[12]} {mbx/ch1_data[13]} {mbx/ch1_data[14]} {mbx/ch1_data[15]} {mbx/ch1_data[16]} {mbx/ch1_data[17]} {mbx/ch1_data[18]} {mbx/ch1_data[19]} {mbx/ch1_data[20]} {mbx/ch1_data[21]} {mbx/ch1_data[22]} {mbx/ch1_data[23]} {mbx/ch1_data[24]} {mbx/ch1_data[25]} {mbx/ch1_data[26]} {mbx/ch1_data[27]} {mbx/ch1_data[28]} {mbx/ch1_data[29]} {mbx/ch1_data[30]} {mbx/ch1_data[31]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe7]
+set_property port_width 1 [get_debug_ports u_ila_0/probe7]
+connect_debug_port u_ila_0/probe7 [get_nets [list iopmp/access_deny_intr]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe8]
+set_property port_width 1 [get_debug_ports u_ila_0/probe8]
+connect_debug_port u_ila_0/probe8 [get_nets [list iopmp/ahb_exp_write]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe9]
+set_property port_width 1 [get_debug_ports u_ila_0/probe9]
+connect_debug_port u_ila_0/probe9 [get_nets [list cpu0_mbx_intr]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe10]
+set_property port_width 1 [get_debug_ports u_ila_0/probe10]
+connect_debug_port u_ila_0/probe10 [get_nets [list cpu1_mbx_intr]]
+set_property C_CLK_INPUT_FREQ_HZ 300000000 [get_debug_cores dbg_hub]
+set_property C_ENABLE_CLK_DIVIDER false [get_debug_cores dbg_hub]
+set_property C_USER_SCAN_CHAIN 1 [get_debug_cores dbg_hub]
+connect_debug_port dbg_hub/clk [get_nets POUT_EHS_OBUF]

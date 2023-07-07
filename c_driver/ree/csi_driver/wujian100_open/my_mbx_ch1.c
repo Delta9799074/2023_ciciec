@@ -28,6 +28,7 @@ void mbx_ch1_irqhandler(int idx)
     *(volatile uint32_t *)0x2003ff0C     = mailbox_status;
     *(volatile uint32_t *) CH1_CTRL_ADDR = CLEAR_INT_CMD;
     //*(volatile uint32_t *)0x2003ff0C     = mailbox_status;
+	printf("Received Data is %x\n", mailbox_data);
 
 }
 

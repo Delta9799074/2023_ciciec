@@ -14,6 +14,7 @@
 #include "soc.h"
 #include "drv_mbx_ch0.h"
 #include "drv_mbx_ch1.h"
+#include "drv_usart.h"
 
 //#include"key.h"
 //#include"led.h"
@@ -38,11 +39,16 @@ extern void mdelay(uint32_t ms);
 #define IOPMP_EXP 0x40100020
 
 #define IOPMP_WRITE 0x40100024
-
+extern usart_handle_t console_handle;
 int main(void)
 {
 	iopmp_initialize(0);
     mbx_ch1_initialize(0);
+	console_handle = csi_usart_initialize(1, NULL);
+    /* config the UART */
+	int32_t ret = 0;
+    ret = csi_usart_config(console_handle, 115200, USART_MODE_ASYNCHRONOUS, USART_PARITY_NONE, USART_STOP_BITS_1, USART_DATA_BITS_8);
+
 	//legal
 	int timer1_value = *(volatile uint32_t *) TIMER1_VREG;
 	//illegal
