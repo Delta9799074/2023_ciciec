@@ -19,16 +19,30 @@ extern int32_t target_get_mbx_ch1(int32_t idx, uint32_t *base, uint32_t *irq, vo
 void mbx_ch1_irqhandler(int idx)
 {
     printf("Begin receiving.\n");
-    int mailbox_ctrl   = *(volatile uint32_t *) CH0_CTRL_ADDR;
-    int mailbox_data   = *(volatile uint32_t *) CH0_DATA_ADDR;
-    int mailbox_status = *(volatile uint32_t *) CH0_STATUS_ADDR;
-    //写入到一个没用的地方(S4)
-    *(volatile uint32_t *)0x2003ff04     = mailbox_ctrl  ;
-    *(volatile uint32_t *)0x2003ff08     = mailbox_data  ;
-    *(volatile uint32_t *)0x2003ff0C     = mailbox_status;
-    *(volatile uint32_t *) CH1_CTRL_ADDR = CLEAR_INT_CMD;
-    //*(volatile uint32_t *)0x2003ff0C     = mailbox_status;
-
+    uint32_t mailbox_ctrl   = *(volatile uint32_t *) CH0_CTRL_ADDR;
+    uint32_t mailbox_mode = (mailbox_ctrl & MBX_MODE_MASK) >> 29;
+    if(mailbox_mode == 1){
+        printf("Mailbox at DATA mode.\n");
+    }
+    else if(mailbox_mode == 2){
+        printf("Mailbox at ADDRESS mode.\n");
+    }
+    else if(mailbox_mode == 3){
+        printf("Mailbox at COMMAND mode.\n");
+    }
+    else{
+        printf("Mailbox ERROR!\n");
+    }
+    uint32_t mailbox_trans_len = (mailbox_ctrl & MBX_LEN_MASK) >> 15;
+    printf("Receving %d data.\n", mailbox_trans_len);
+    uint32_t slave_addr = 0x2003ff08;
+    for(int j = 0; j < mailbox_trans_len; j++){
+        printf("%d:\n",j);
+        int mailbox_data   = *(volatile uint32_t *) CH0_DATA_ADDR;
+        *(volatile uint32_t *)slave_addr = mailbox_data;
+        printf("Received %x, Write to %x\n", mailbox_data, slave_addr);
+        slave_addr+=4;
+    }
 }
 
 void mbx_ch1_initialize(int32_t idx)
@@ -57,4 +71,33 @@ void mbx_ch1_initialize(int32_t idx)
     drv_irq_enable(irq);
 
     return;
+}
+
+void mbx_ch1_config(uint32_t mailbox_intr_en, uint32_t mailbox_mode, uint32_t trans_length, uint32_t mailbox_read_ok, uint32_t mailbox_addrmode_wr){
+    uint32_t ctrl_reg;
+    uint32_t mailbox_intr_en_temp               = mailbox_intr_en;
+    uint32_t mailbox_mode_temp                  = mailbox_mode;
+    uint32_t trans_length_temp                  = trans_length;
+    uint32_t mailbox_read_ok_temp               = mailbox_read_ok;
+    uint32_t mailbox_addrmode_wr_temp           = mailbox_addrmode_wr;
+             mailbox_intr_en_temp               = (mailbox_intr_en_temp << 31) & MBX_INT_MASK;
+             mailbox_mode_temp                  = (mailbox_mode_temp << 29) & MBX_MODE_MASK;
+             trans_length_temp                  = (trans_length_temp << 15) & MBX_LEN_MASK;
+             mailbox_read_ok_temp               = (mailbox_read_ok_temp << 14) & MBX_OTHER_MASK;
+             mailbox_addrmode_wr_temp           = (mailbox_addrmode_wr_temp << 13) & MBX_OTHER_MASK;
+             ctrl_reg                           = mailbox_intr_en_temp | mailbox_mode_temp | trans_length_temp | mailbox_read_ok_temp | mailbox_read_ok_temp | mailbox_addrmode_wr_temp;
+
+    
+    *(volatile uint32_t *) CH1_CTRL_ADDR = ctrl_reg;
+    printf("Success config mailbox.\n");
+}
+
+void mbx_ch1_send(int32_t trans_data){
+    *(volatile uint32_t *) CH1_DATA_ADDR = trans_data;
+    printf("Success send %x.\n", trans_data);
+}
+
+void mbx_ch1_putintr(void){
+    *(volatile uint32_t *) CH1_STATUS_ADDR = 0x00000003;
+    printf("Send Interrupt to TEE.\n");
 }

@@ -689,10 +689,14 @@ assign qspi_dq[1] = 1'b1;  //hold引脚信号，连接到 spi_nss 上？todo
 // input   [31:0]  pad_cpu_rst_addr;    
 // wire    [31:0]  pad_cpu_rst_addr;  
 input           clk;            //100Mhz
+//?2023/07/11
+wire pll_clk;
+/*parameter SIM_SPEED = 0;
+assign PIN_EHS = SIM_SPEED ? clk : pll_clk;*/
 clk_wiz_0 u_clk_wiz_0
  (
   // Clock out ports
-  .clk_out1(PIN_EHS),  //20Mhz  
+  .clk_out1(PIN_EHS/* pll_clk */),  //20Mhz  
   // Status and control signals
   //.resetn(PAD_MCURST),  
  // Clock in ports

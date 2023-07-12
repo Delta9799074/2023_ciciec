@@ -155,6 +155,44 @@ static int read_flash(int32_t idx)  //传入USI2
 
 int main(void)
 {
+// #define __NO_BOARD_INIT 1 in csi_config.h,   so startup.S will not execute board_init()
+
+
+//    printf("Hello World!\n");
+//	printf("HEllo!\n");
+
+/*int mailbox_ctrl     = 0;
+int mailbox_data     = 0;
+int mailbox_status   = 0;
+int acisr;*/
+/*
+    acisr = *(volatile uint32_t *) ACISR_ADDR;
+while ( acisr == 0x1){
+    printf("Begin receiving.\n");
+    mailbox_ctrl   = *(volatile uint32_t *) CH1_CTRL_ADDR;
+    mailbox_data   = *(volatile uint32_t *) CH1_DATA_ADDR;
+    mailbox_status = *(volatile uint32_t *) CH1_STATUS_ADDR;
+	if(mailbox_data == 0x00000040){
+		*(volatile uint32_t *) 0x40020008 = 0x0000400;
+	}
+	else{
+		
+	}
+}*/
+//printf("Transfer Initial:\n");
+/*
+    *(volatile uint32_t *) CH0_CTRL_ADDR 	= 0xE000C000;
+    *(volatile uint32_t *) CH0_DATA_ADDR 	= 0xA0000000;
+    *(volatile uint32_t *) CH0_STATUS_ADDR 	= 0x00000003;
+*/
+//mdelay(500);
+/*
+acisr = *(volatile uint32_t *) 0x40020004;
+if(acisr == 0){
+    printf("Transfer Succeed!");
+}
+*/
+
     int32_t ret = 0;
     /* init the console*/
 
@@ -166,7 +204,19 @@ int main(void)
         return -1;
     }
    
- 
+   /* 读取flash id 并搬运 REE 代码*/
+/*     ret = read_flash(EXAMPLE_SPI_IDX);
+    if (ret < 0) {
+        printf("load ree code from flash failed\n");
+        return -1;
+    }
+	
+    printf("I'm TEE. Load REE Code from flash successfully\n");
+
+	//启动REE CPU 工作
+	printf("I'm TEE. Start REE Config!!!\n");
+ */	
+    //mdelay(50);
 	uint32_t *ree_rst_b = (uint32_t *)0x30000000;     //按字节存储
 	uint32_t *ree_rst_addr = (uint32_t *) 0x30000004;
 	
@@ -174,18 +224,108 @@ int main(void)
 	*ree_rst_b = 0x1;
 	
 	printf("I'm TEE. I have configured REE. Finish!!!\n");
-    csi_usart_uninitialize(console_handle);
+    //csi_usart_uninitialize(console_handle);
     /* 在startup.s中pc跳转到对应位置，可实现bootrom运行后，从flash中搬移fsbl代码，之后TEE CPU跳转到fsbl代码区执行 fsbl中的代码 */
     
     printf("I'm TEE. Get into Low Power Mode.\n");
 
-    //open timer
+    /*//open timer
     int time_ret;
     int time_start_ret;
     timer_handle_t timer_handle;
     timer_handle   = csi_timer_initialize(0, timer_event_cb_fun);
     time_ret       = csi_timer_config(timer_handle, TIMER_MODE_FREE_RUNNING);
-    time_start_ret = csi_timer_start(timer_handle);
+    time_start_ret = csi_timer_start(timer_handle);*/
     mbx_ch0_initialize(0);
+
+    uint32_t mailbox_mode = 1;      //data mode
+    uint32_t trans_length = 2;     //data
+
+    mdelay(5);
+    printf("Transfer Initial:\n");
+    mbx_ch0_config(1, mailbox_mode, trans_length, 0, 0);
+    int32_t data_test = 0x0A0B0C0D;
+    for(int k = 0; k < trans_length; k++){
+        mbx_ch0_send(data_test);
+        data_test = data_test + 1;
+    }
+    mbx_ch0_putintr();
+/*     mdelay(10);
+    int mailbox_ctrl     = 0;
+    int mailbox_data     = 0;
+    int mailbox_status   = 0;
+    while ( (*(volatile uint32_t *) ACISR_ADDR) != 0x1 ){
+    printf("Begin receiving.\n");
+        mailbox_ctrl   = *(volatile uint32_t *) CH1_CTRL_ADDR;
+        mailbox_data   = *(volatile uint32_t *) CH1_DATA_ADDR;
+        mailbox_status = *(volatile uint32_t *) CH1_STATUS_ADDR;
+    }
+	
+    //写入到一个没用的地方(S4)
+    *(volatile uint32_t *)0x2003ff04 = mailbox_ctrl  ;
+    *(volatile uint32_t *)0x2003ff08 = mailbox_data  ;
+    *(volatile uint32_t *)0x2003ff0C = mailbox_status;
+
+    *(volatile uint32_t *) CH0_CTRL_ADDR = CLEAR_INT_CMD; */
+/*
+    uint32_t crosscore_transfer_data = 0xEF0000EF;
+    mailbox_handle_t my_mailbox_ch0;
+    my_mailbox_ch0 = drv_mailbox_ch0_initialize(0);
+    int32_t ch0_config_success;
+    ch0_config_success = drv_mailbox_config_ch0(my_mailbox_ch0, 0x01, 0x01, 0x01);
+    if(ch0_config_success == 0){
+        printf("Mailbox Channel 0 Config Succeed!");
+    }
+    else{
+        printf("Mailbox Channel 0 Config Error!");
+    }
+    int32_t ch0_send_data_success;
+    ch0_send_data_success = drv_mailbox_wdata_ch0(my_mailbox_ch0, crosscore_transfer_data);
+    if(ch0_send_data_success == 0){
+        printf("Mailbox Channel 0 Send Data Succeed!");
+    }
+    else{
+        printf("Mailbox Channel 0 Send Data Error!");
+    }
+    int32_t ch0_send_intr_success;
+    ch0_send_intr_success = drv_mailbox_crosscore_notify_ch0(my_mailbox_ch0);
+    if(ch0_send_intr_success == 0){
+        printf("Mailbox Channel 0 Send Interrupt Succeed!");
+    }
+    else{
+        printf("Mailbox Channel 0 Send Interrupt Error!");
+    }
+*/
+/* int int_mailbox_flag = 0;
+    int_mailbox_flag = *(volatile uint32_t *) 0x40020004;
+int mailbox_ctrl     = 0;
+int mailbox_data     = 0;
+int mailbox_status   = 0;
+int acisr            = 0; */
+/*while ( int_mailbox_flag == 0x1){
+    printf("Begin receiving.\n");
+    mailbox_ctrl   = *(volatile uint32_t *) CH1_CTRL_ADDR;
+    mailbox_data   = *(volatile uint32_t *) CH1_DATA_ADDR;
+    mailbox_status = *(volatile uint32_t *) CH1_STATUS_ADDR;
+}
+
+if(mailbox_ctrl == 0xE000C000){
+    if(mailbox_data == 0x00000040){
+        *(volatile uint32_t *) 0x40020008 = 0x0000400;
+    }
+}*/
+
+//mdelay(500);
+/* printf("Transfer Initial:\n");
+    *(volatile uint32_t *) CH0_CTRL_ADDR = 0xE000C000;
+    *(volatile uint32_t *) CH0_DATA_ADDR = 0xA0000000;
+    *(volatile uint32_t *) CH0_CTRL_ADDR = 0x00000001;
+
+//mdelay(500);
+acisr = *(volatile uint32_t *) 0x40020004;
+if(acisr == 0){
+    printf("Transfer Succeed!");
+} */   
+	//csi_usart_uninitialize(console_handle); 
     return 0;
 }
